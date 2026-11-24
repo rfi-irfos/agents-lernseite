@@ -1,0 +1,113 @@
+/* Startbildschirm: Rahmen der Bühne und des Textfelds sind unsichtbar, bis das Eintauchen beginnt. */
+#app[data-phase='start'] [data-slot='buehne'],
+#app[data-phase='start'] [data-slot='text'] {
+  border-color: transparent;
+  background: transparent;
+}
+
+#app[data-phase='start'][data-format='hoch'],
+#app[data-phase='start'][data-format='quadrat'] {
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
+}
+
+#app[data-phase='start'] [data-slot='buehne'] {
+  overflow: hidden;
+}
+
+.start-body {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s3);
+  padding: var(--s3);
+}
+
+.start-body h1 {
+  margin: 0;
+  font-size: clamp(20px, 4.5vmin, 40px);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.start-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14em), 1fr));
+  gap: var(--s2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.start-cards .glass {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  font-size: clamp(12px, 1.9vmin, 17px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  padding: var(--s2) var(--s3);
+}
+
+.start-cards .glass[aria-pressed='true'] {
+  border-color: var(--focus);
+}
+
+.start-note {
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--s2) var(--s3);
+  color: var(--ink);
+  font-size: clamp(12px, 1.9vmin, 16px);
+  overflow-wrap: anywhere;
+}
+
+.start-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  padding: var(--s2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.start-form input {
+  flex: 1 1 10em;
+  min-width: 0;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: clamp(14px, 2.2vmin, 18px);
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  padding: var(--s2);
+}
+
+.start-form input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.start-form .glass:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.orb {
+  position: absolute;
+  width: var(--s4);
+  height: var(--s4);
+  margin: calc(var(--s4) / -2) 0 0 calc(var(--s4) / -2);
+  border-radius: 50%;
+  background: var(--orb);
+  box-shadow: 0 0 var(--s4) var(--orb);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-form {
+    transition: none;
+  }
+}
