@@ -1,0 +1,22 @@
+{
+  "name": "agents-lernseite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "gsap": "^3.15.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.1"
+  }
+}
