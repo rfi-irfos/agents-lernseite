@@ -221,3 +221,39 @@ for (const size of [
     }
   })
 }
+
+test('die Antwort-Blase bleibt voll sichtbar, bis ihre Lesezeit um ist, erst dann beginnt der Rückblick', async ({ page }) => {
+  test.setTimeout(40_000)
+  await toDone(page, '&motion=1')
+  const ergebnis = await page.evaluate(() => document.querySelector('.chat-text')?.textContent ?? '')
+  const ms = Math.ceil(((ergebnis.split(/\s+/).filter(Boolean).length / 3) * 1000))
+  expect(ms).toBeGreaterThan(1000)
+  let full: number | null = null
+  let reviewAt: number | null = null
+  const t0 = Date.now()
+  while (Date.now() - t0 < 15_000 && reviewAt === null) {
+    const s = await page.evaluate(() => {
+      const b = document.querySelector('.chatblase')
+      return { op: b ? Number(getComputedStyle(b).opacity) : null, rb: !!document.querySelector('.rb-stage') }
+    })
+    if (s.op === 1 && full === null) full = Date.now()
+    if (s.rb) reviewAt = Date.now()
+    await page.waitForTimeout(40)
+  }
+  expect(full, 'Blase wurde voll sichtbar').not.toBeNull()
+  expect(reviewAt, 'Rückblick begann').not.toBeNull()
+  expect(reviewAt! - full!).toBeGreaterThanOrEqual(ms - 150)
+})
+
+test('reduzierte Bewegung: die Blase bleibt ebenfalls bis zum Ende der Lesezeit', async ({ browser }) => {
+  test.setTimeout(40_000)
+  const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 800, height: 600 } })
+  const page = await ctx.newPage()
+  await toDone(page, '&motion=1')
+  const ergebnis = await page.evaluate(() => document.querySelector('.chat-text')?.textContent ?? '')
+  const ms = Math.ceil(((ergebnis.split(/\s+/).filter(Boolean).length / 3) * 1000))
+  const t0 = Date.now()
+  await expect(page.locator('.rb-stage')).toBeVisible({ timeout: 15_000 })
+  expect(Date.now() - t0).toBeGreaterThanOrEqual(ms - 400)
+  await ctx.close()
+})

@@ -25,8 +25,14 @@ describe('buildSteps', () => {
   })
   it('pruefen im ersten Durchlauf trägt den Schleifengrund als extraText', () => {
     const s = buildSteps(scenario(true))
-    expect(s.filter((x) => x.extraText)).toHaveLength(1)
-    expect(s.find((x) => x.extraText)).toMatchObject({ station: 'pruefen', pass: 1, extraText: 'Nochmal' })
-    expect(buildSteps(scenario()).some((x) => x.extraText)).toBe(false)
+    expect(s.filter((x) => x.extraText && x.station === 'pruefen')).toHaveLength(1)
+    expect(s.find((x) => x.station === 'pruefen' && x.extraText)).toMatchObject({ pass: 1, extraText: 'Nochmal' })
+    expect(buildSteps(scenario()).some((x) => x.station === 'pruefen' && x.extraText)).toBe(false)
+  })
+  it('ergebnis trägt die Antwort als extraText, die Haltezeit zählt sie mit', () => {
+    const sc = scenario()
+    const e = buildSteps(sc).at(-1)!
+    expect(e.station).toBe('ergebnis')
+    expect(e.extraText).toBe(sc.ergebnis)
   })
 })

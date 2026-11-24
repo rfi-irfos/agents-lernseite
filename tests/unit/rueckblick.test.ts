@@ -19,3 +19,14 @@ describe('Rückblick: Lernkurve', () => {
     )
   })
 })
+
+describe('Rückblick: Texte positiv formuliert', () => {
+  it('die eigenen Sätze enthalten keine Verneinung', () => {
+    const r = de.rueckblick
+    const all = [
+      r.weiter, r.kreislauf.intro, r.kreislauf.gedaechtnisText, ...Object.values(r.kreislauf.stationen),
+      ...Object.values(r.besser.verlaeufe).flatMap((v) => [v.label, v.satz]), r.auswahl.titel,
+    ].join(' ')
+    expect(all).not.toMatch(/\b(nicht|kein\w*|ohne|nie|niemals|nichts)\b/i)
+  })
+})
