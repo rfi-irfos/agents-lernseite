@@ -71,7 +71,8 @@ export function mountRueckblick(o: RueckblickOpts): () => void {
 
   // Die Antwort-Blase und der letzte Szenentext blenden aus, dann beginnt der Kreislauf.
   const old = [...Array.from(o.buehne.children), ...Array.from(o.text.children), ...Array.from(o.eingabe.children)]
-  const start = gsap.delayedCall(d(o.reduced ? 0.1 : 1.2), () => {
+  // Die Pause gilt auch im Testmodus, damit der Done-Zustand beobachtbar bleibt.
+  const start = gsap.delayedCall(o.reduced ? 0.1 : 1.2, () => {
     if (!alive) return
     fade = gsap.to(old, {
       opacity: 0,
