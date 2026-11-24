@@ -7,6 +7,9 @@ gsap.registerPlugin(Flip)
 const DURATION = 0.5
 const FADE = 0.1
 
+/** Zuletzt angeforderte Anordnung; sie gewinnt immer, auch während eine Überblendung läuft. */
+let target: Format | undefined
+
 function app(): HTMLElement | null {
   return document.getElementById('app')
 }
@@ -19,14 +22,19 @@ function reduced(): boolean {
 export function applyFormat(f: Format): void {
   const root = app()
   if (!root) return
-  const prev = root.dataset.format
+  const prev = target ?? root.dataset.format
   if (prev === f) return
-  if (!prev) {
+  target = f
+  gsap.killTweensOf(root)
+  if (!root.dataset.format) {
     root.dataset.format = f
     return
   }
-  gsap.killTweensOf(root)
   if (reduced()) {
+    if (root.dataset.format === f) {
+      gsap.to(root, { opacity: 1, duration: FADE, ease: 'power2.inOut', clearProps: 'opacity' })
+      return
+    }
     gsap.to(root, {
       opacity: 0,
       duration: FADE,
@@ -38,6 +46,7 @@ export function applyFormat(f: Format): void {
     })
     return
   }
+  gsap.set(root, { clearProps: 'opacity' })
   const slots = gsap.utils.toArray<HTMLElement>('[data-slot]:not([data-slot=fx])', root)
   Flip.killFlipsOf(slots)
   const state = Flip.getState(slots)

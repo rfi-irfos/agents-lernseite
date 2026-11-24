@@ -138,7 +138,8 @@ test('reduzierte Bewegung: der zuletzt angeforderte Wechsel gewinnt, auch mitten
   await page.goto('/')
   await expect(page.locator('#app')).toHaveAttribute('data-format', 'hoch')
   await page.evaluate(async () => {
-    const mod = await import(/* @vite-ignore */ '/src/ui/layout.ts')
+    const path = '/src/ui/layout.ts'
+    const mod = await import(/* @vite-ignore */ path)
     mod.applyFormat('quer')
     await new Promise((r) => setTimeout(r, 30))
     mod.applyFormat('hoch')
