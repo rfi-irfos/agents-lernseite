@@ -1,0 +1,169 @@
+import { describe, it, expect, vi } from 'vitest'
+import { Player } from '../../src/engine/player'
+import { buildSteps } from '../../src/engine/steps'
+import { readingMs } from '../../src/engine/reading-time'
+import { scenario, script } from './fixtures'
+import type { Step } from '../../src/engine/steps'
+
+const steps = () => buildSteps(scenario())
+const toQuiz = (p: Player) => {
+  p.start()
+  while (p.state !== 'quiz') p.tick(readingMs(p.step.script.text))
+}
+
+describe('Player', () => {
+  it('Auto: nach Lesezeit weiter', () => {
+    const p = new Player(steps())
+    p.start()
+    expect(p.index).toBe(0)
+    p.tick(readingMs(p.step.script.text) - 1)
+    expect(p.index).toBe(0)
+    p.tick(1)
+    expect(p.index).toBe(1)
+  })
+  it('kurz: min(Lesezeit, 2000)', () => {
+    const long = 'wort '.repeat(30)
+    const st: Step[] = [
+      { station: 'eingabe', script: script('eingabe', { text: long, kurz: true }), pass: 1 },
+      { station: 'wahrnehmung', script: script('wahrnehmung'), pass: 1 },
+    ]
+    const p = new Player(st)
+    p.start()
+    p.tick(1999)
+    expect(p.index).toBe(0)
+    p.tick(1)
+    expect(p.index).toBe(1)
+  })
+  it('manuell: tick bewegt nichts', () => {
+    const p = new Player(steps(), { auto: false })
+    p.start()
+    p.tick(100000)
+    expect(p.index).toBe(0)
+    p.next()
+    expect(p.index).toBe(1)
+  })
+  it('werkzeug: quiz, 7999 bleibt, 1 beantwortet richtig', () => {
+    const p = new Player(steps())
+    toQuiz(p)
+    expect(p.step.station).toBe('werkzeug')
+    const at = p.index
+    p.tick(7999)
+    expect(p.state).toBe('quiz')
+    expect(p.index).toBe(at)
+    p.tick(1)
+    expect(p.index).toBe(at + 1)
+    expect(p.state).toBe('playing')
+  })
+  it('manuell: Quiz wartet auf answerQuiz', () => {
+    const p = new Player(steps(), { auto: false })
+    p.goTo(4)
+    expect(p.state).toBe('quiz')
+    p.tick(60000)
+    expect(p.state).toBe('quiz')
+  })
+  it('falsche Antwort liefert Erklärung und geht weiter', () => {
+    const p = new Player(steps())
+    toQuiz(p)
+    const at = p.index
+    expect(p.answerQuiz(0)).toEqual({ richtig: false, erklaerung: 'Darum B.' })
+    expect(p.index).toBe(at + 1)
+  })
+  it('richtige Antwort', () => {
+    const p = new Player(steps())
+    toQuiz(p)
+    expect(p.answerQuiz(1).richtig).toBe(true)
+  })
+  it('zweiter Durchlauf: kein Quiz', () => {
+    const p = new Player(buildSteps(scenario(true)), { auto: false })
+    p.goTo(9)
+    expect(p.step.station).toBe('werkzeug')
+    expect(p.state).toBe('playing')
+  })
+  it('start() zweimal: genau ein step-Ereignis', () => {
+    const p = new Player(steps())
+    const cb = vi.fn()
+    p.on('step', cb)
+    p.start()
+    p.start()
+    expect(cb).toHaveBeenCalledTimes(1)
+  })
+  it('next() im Übergang wird gemerkt und einmal ausgeführt', () => {
+    const p = new Player(steps(), { auto: false })
+    p.start()
+    p.beginTransition()
+    expect(p.state).toBe('transition')
+    p.next()
+    p.next()
+    expect(p.index).toBe(0)
+    p.endTransition()
+    expect(p.index).toBe(1)
+    expect(p.state).toBe('playing')
+  })
+  it('Übergang zählt Haltezeit nicht', () => {
+    const p = new Player(steps())
+    p.start()
+    p.beginTransition()
+    p.tick(100000)
+    p.endTransition()
+    expect(p.index).toBe(0)
+  })
+  it('pause friert tick ein, play setzt fort', () => {
+    const p = new Player(steps())
+    p.start()
+    p.pause()
+    expect(p.state).toBe('paused')
+    p.tick(100000)
+    expect(p.index).toBe(0)
+    p.play()
+    expect(p.state).toBe('playing')
+    p.tick(readingMs(p.step.script.text))
+    expect(p.index).toBe(1)
+  })
+  it('prev bei 0 bleibt 0; goTo(99) klemmt', () => {
+    const p = new Player(steps(), { auto: false })
+    p.start()
+    p.prev()
+    expect(p.index).toBe(0)
+    p.goTo(99)
+    expect(p.index).toBe(7)
+  })
+  it('nach dem letzten Schritt: done', () => {
+    const p = new Player(steps(), { auto: false })
+    p.goTo(7)
+    p.next()
+    expect(p.state).toBe('done')
+    const cb = vi.fn()
+    p.on('done', cb)
+    p.tick(1000)
+    expect(cb).not.toHaveBeenCalled()
+  })
+  it('Auto: Ende erreicht done, done-Ereignis einmal', () => {
+    const p = new Player(steps())
+    const cb = vi.fn()
+    p.on('done', cb)
+    p.start()
+    for (let i = 0; i < 100 && p.state !== 'done'; i++) p.tick(9000)
+    expect(p.state).toBe('done')
+    expect(cb).toHaveBeenCalledTimes(1)
+  })
+  it('setTempo(1.5) verkürzt laufende Haltezeit anteilig', () => {
+    const p = new Player(steps())
+    p.start()
+    const full = readingMs(p.step.script.text)
+    p.tick(Math.floor(full / 2))
+    p.setTempo(1.5)
+    const rest = readingMs(p.step.script.text, 1.5) / 2
+    p.tick(rest - 50)
+    expect(p.index).toBe(0)
+    p.tick(100)
+    expect(p.index).toBe(1)
+  })
+  it('on() liefert Abmelder', () => {
+    const p = new Player(steps())
+    const cb = vi.fn()
+    const off = p.on('state', cb)
+    off()
+    p.start()
+    expect(cb).not.toHaveBeenCalled()
+  })
+})
