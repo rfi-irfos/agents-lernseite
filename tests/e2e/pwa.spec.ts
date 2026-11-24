@@ -3,10 +3,16 @@ import { test, expect, type Page } from '@playwright/test'
 type TW = { __player?: { state: string; goTo(i: number): void; next(): void } }
 
 async function swAktiv(page: Page) {
-  await page.waitForFunction(async () => {
-    const reg = await navigator.serviceWorker.getRegistration()
-    return !!reg?.active && !!navigator.serviceWorker.controller
-  }, null, { timeout: 20000 })
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async () => {
+          const reg = await navigator.serviceWorker.getRegistration()
+          return !!reg?.active && !!navigator.serviceWorker.controller
+        }),
+      { timeout: 20000 },
+    )
+    .toBe(true)
 }
 
 test('Manifest: standalone, de, Icons 192/512/maskable', async ({ page, request, baseURL }) => {

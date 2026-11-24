@@ -28,6 +28,7 @@ import type { Player as PlayerT } from './engine/player'
 import type { StartResult } from './ui/start'
 import { dur, isTest, pushEvent, reducedMotion, spyAudio } from './env'
 import type { SceneCtx } from './scenes/types'
+import { initPwa } from './pwa'
 import type { Format, Scenario, Tempo } from './engine/types'
 
 applyTheme(initialTheme())
@@ -201,3 +202,5 @@ function showStart(): void {
 }
 
 showStart()
+
+initPwa()

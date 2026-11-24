@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Glasbox, zweifarbig: helle Glasflaeche, orange Daten-Kugel (#f04d20), Highlight rechts -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e6ecf6"/>
+    </linearGradient>
+    <radialGradient id="o" cx="0.62" cy="0.34" r="0.8">
+      <stop offset="0" stop-color="#ff8a5c"/><stop offset="0.55" stop-color="#f04d20"/><stop offset="1" stop-color="#c63a12"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#g)" stroke="#d5dce8" stroke-width="6"/>
+  <rect x="28" y="28" width="456" height="456" rx="100" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.9"/>
+  <circle cx="256" cy="262" r="132" fill="#1b2433" opacity="0.10"/>
+  <circle cx="256" cy="256" r="128" fill="url(#o)"/>
+  <ellipse cx="318" cy="206" rx="22" ry="46" transform="rotate(28 318 206)" fill="#ffffff" opacity="0.7"/>
+</svg>
