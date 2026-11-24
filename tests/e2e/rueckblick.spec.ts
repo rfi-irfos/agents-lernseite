@@ -209,6 +209,11 @@ for (const size of [
               out.push(`${slotName}: ${e.className || e.tagName} ragt heraus`)
           }
         }
+        for (const t of Array.from(document.querySelectorAll('.rb-karte-titel'))) {
+          if (t.scrollWidth > t.clientWidth + 1 || t.scrollHeight > t.clientHeight + 1) out.push(`Titel abgeschnitten: ${t.textContent}`)
+          if (t.textContent && getComputedStyle(t).textOverflow === 'ellipsis') out.push('Auslassungspunkte im Titel')
+          if (t.textContent && t.textContent.includes('…')) out.push('Auslassung im Titel')
+        }
         const app = document.getElementById('app')!.getBoundingClientRect()
         for (const e of Array.from(document.querySelectorAll('[data-slot=steuerung] button'))) {
           const r = e.getBoundingClientRect()

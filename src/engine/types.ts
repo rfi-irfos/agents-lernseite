@@ -47,6 +47,8 @@ export interface Schleife { grund: string; zweiterDurchlauf: StationScript[] }
 export interface Scenario {
   id: string
   titel: string
+  /** Kurzer Name für schmale Karten (Rückblick), höchstens 8 Zeichen. */
+  kurzname?: string
   aufgabe: string
   art: Art
   stichwoerter: string[]

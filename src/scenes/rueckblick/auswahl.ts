@@ -21,7 +21,8 @@ export function auswahl(c: PartCtx, scenarios: Scenario[], seen: string[], onPic
     const done = seen.includes(s.id)
     if (done) b.dataset.seen = 'true'
     const name = el('span', 'rb-karte-titel')
-    name.textContent = s.titel
+    name.textContent = s.kurzname ?? s.titel
+    b.setAttribute('aria-label', done ? `${s.titel}, ${t.gesehen}` : s.titel)
     b.append(name)
     if (done) {
       b.insertAdjacentHTML('beforeend', HAKEN)

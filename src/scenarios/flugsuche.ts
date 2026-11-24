@@ -3,6 +3,7 @@ import type { Scenario } from '../engine/types'
 export const flugsuche: Scenario = {
   id: 'flugsuche',
   titel: 'Flug suchen',
+  kurzname: 'Flug',
   aufgabe: 'Finde mir den günstigsten Flug von Graz nach Berlin am Freitag.',
   art: 'suche',
   stichwoerter: ['flug', 'flieg', 'flughafen', 'ticket', 'umstieg', 'abflug'],

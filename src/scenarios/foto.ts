@@ -3,6 +3,7 @@ import type { Scenario } from '../engine/types'
 export const foto: Scenario = {
   id: 'foto',
   titel: 'Foto-Frage',
+  kurzname: 'Foto',
   aufgabe: 'Was für eine Pflanze ist das?',
   art: 'bild',
   stichwoerter: ['foto', 'pflanze', 'blume', 'baum', 'blüte', 'fotografier', 'bild von'],

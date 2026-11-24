@@ -3,6 +3,7 @@ import type { Scenario } from '../engine/types'
 export const programm: Scenario = {
   id: 'programm',
   titel: 'Kleines Programm',
+  kurzname: 'Programm',
   aufgabe: 'Schreib mir ein Programm, das meine Einkaufsliste sortiert.',
   art: 'code',
   stichwoerter: ['programm', 'code', 'einkaufsliste', 'skript', 'python', 'sortier', 'programmier'],
@@ -94,7 +95,7 @@ export const programm: Scenario = {
       },
       {
         id: 'handeln',
-        text: 'Er ändert die Zeile und startet den Test, und diesmal leuchtet er grün.',
+        text: 'Er ändert die Zeile und startet den Test, und diesmal leuchtet der Test grün.',
         daten: {
           zeilen: ['einkauf = ["Milch", "Brot", "Apfel"]', 'einkauf.sort()', 'print(einkauf)'],
           test: { name: 'Apfel steht vor Brot und Milch', ok: true },

@@ -1,8 +1,9 @@
+import { parseHandelnDaten } from '../src/engine/handeln'
 import type { Scenario, StationScript } from '../src/engine/types'
 
 /** Reine Prüf- und Sammelfunktionen für Texte, ohne Dateizugriff (damit sie sich testen lassen). */
 
-export type Unit = { wo: string; art: 'text' | 'tiefer' | 'sonst'; text: string }
+export type Unit = { wo: string; art: 'text' | 'tiefer' | 'sonst' | 'daten' | 'code'; text: string }
 export type Fund = { regel: string; wo: string; hinweis: string }
 
 const ABK = ['z. B.', 'd. h.', 'u. a.', 'ca.', 'bzw.', 'usw.', 'etc.', 'Nr.', 'vgl.', 'ggf.', 'evtl.', 'z. T.']
@@ -44,6 +45,38 @@ const ASCII_UMLAUT = [
   'schoen', 'schueler', 'mueller', 'tuer', 'koerper', 'oeffnen', 'oeffnet', 'spaeter', 'zusaetzlich', 'saetze',
 ]
 
+/** Texte der Handeln-Animation, wie sie auf dem Bildschirm stehen. Codezeilen erscheinen im Prüfblatt, die Regeln gelten dort nicht. */
+export function handelnTexte(art: Scenario['art'], daten: unknown): { wo: string; text: string; art: 'daten' | 'code' }[] {
+  const out: { wo: string; text: string; art: 'daten' | 'code' }[] = []
+  const add = (wo: string, text: string, a: 'daten' | 'code' = 'daten') => text.trim() && out.push({ wo, text, art: a })
+  if (art === 'suche') {
+    parseHandelnDaten('suche', daten)?.treffer.forEach((t, i) => {
+      add(`Treffer ${i + 1} Titel`, t.titel)
+      add(`Treffer ${i + 1} Detail`, t.detail)
+    })
+  } else if (art === 'api') {
+    const d = parseHandelnDaten('api', daten)
+    if (d) {
+      add('Anfrage', d.anfrage)
+      add('Antwort', d.antwort)
+    }
+  } else if (art === 'code') {
+    const d = parseHandelnDaten('code', daten)
+    if (d) {
+      d.zeilen.forEach((z, i) => add(`Codezeile ${i + 1}`, z, 'code'))
+      add('Testname', d.test.name)
+    }
+  } else if (art === 'bild') {
+    parseHandelnDaten('bild', daten)?.markierungen.forEach((m, i) => add(`Markierung ${i + 1}`, m.label))
+  } else {
+    parseHandelnDaten('planung', daten)?.punkte.forEach((p, i) => {
+      add(`Halt ${i + 1} Ort`, p.ort)
+      add(`Halt ${i + 1} Zeit`, p.zeit)
+    })
+  }
+  return out
+}
+
 /** Alle Texte eines Ablaufs mit Fundort. Aufgabe und Handeln-Daten bleiben draußen, sie wiederholen die Erzählung absichtlich. */
 export function collect(s: Scenario): Unit[] {
   const u: Unit[] = []
@@ -58,6 +91,7 @@ export function collect(s: Scenario): Unit[] {
       add(`${pre}${st.id}/Frage`, 'sonst', st.werkzeug.frage)
       add(`${pre}${st.id}/Erklärung`, 'sonst', st.werkzeug.erklaerung)
     }
+    if (st.id === 'handeln') handelnTexte(s.art, st.daten).forEach((h) => add(`${pre}${st.id}/${h.wo}`, h.art, h.text))
     const sch = st.daten?.schritte
     if (Array.isArray(sch)) sch.forEach((x, i) => typeof x === 'string' && add(`${pre}${st.id}/Schritt ${i + 1}`, 'sonst', x))
   }
@@ -103,6 +137,7 @@ export function checkScenario(s: Scenario): Fund[] {
   const funde: Fund[] = []
   const units = collect(s)
   for (const u of units) {
+    if (u.art === 'code') continue
     for (const satz of sentences(u.text)) {
       const n = wordCount(satz)
       if (n > 18) funde.push({ regel: 'Satzlänge', wo: u.wo, hinweis: `${n} Wörter: „${satz}“` })
@@ -110,9 +145,11 @@ export function checkScenario(s: Scenario): Fund[] {
     if (u.art === 'text') {
       const n = sentences(u.text).length
       if (n > 1) funde.push({ regel: 'Satzanzahl', wo: u.wo, hinweis: `${n} Sätze statt einem` })
+    }
+    if (u.art === 'text' || u.art === 'daten') {
       for (const j of JARGON) {
         if (new RegExp(`(^|[^\\p{L}\\p{N}])${j}s?($|[^\\p{L}\\p{N}])`, 'iu').test(u.text)) {
-          funde.push({ regel: 'Fachwort', wo: u.wo, hinweis: `„${j}“ im Stationstext` })
+          funde.push({ regel: 'Fachwort', wo: u.wo, hinweis: `„${j}“ im Text auf dem Bildschirm` })
         }
       }
     }
@@ -129,7 +166,7 @@ export function checkScenario(s: Scenario): Fund[] {
     }
   }
   // Planschritte sind die Plankarten zum Plansatz und wiederholen ihn mit Absicht.
-  for (const r of repeatedTrigrams(units.filter((x) => !x.wo.includes('/Schritt ')))) {
+  for (const r of repeatedTrigrams(units.filter((x) => !x.wo.includes('/Schritt ') && x.art !== 'daten' && x.art !== 'code'))) {
     funde.push({ regel: 'Wiederholung', wo: r.wo.join(' und '), hinweis: `Wortfolge „${r.folge}“` })
   }
   return funde

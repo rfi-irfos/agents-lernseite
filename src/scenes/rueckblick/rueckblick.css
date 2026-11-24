@@ -273,9 +273,7 @@
 }
 .rb-karte-titel {
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 /* Schmale Telefone: fünf Karten in drei flachen Reihen, damit die Bühne nicht überläuft. */
 @media (max-width: 420px) {

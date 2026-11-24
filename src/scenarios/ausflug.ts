@@ -3,6 +3,7 @@ import type { Scenario } from '../engine/types'
 export const ausflug: Scenario = {
   id: 'ausflug',
   titel: 'Ausflug planen',
+  kurzname: 'Ausflug',
   aufgabe: 'Plane einen Schulausflug nach Wien für 25 Kinder.',
   art: 'planung',
   stichwoerter: ['ausflug', 'klassenfahrt', 'wandertag', 'exkursion', 'schulreise', 'kinder'],
@@ -100,7 +101,7 @@ export const ausflug: Scenario = {
       },
       {
         id: 'handeln',
-        text: 'Er legt die neue Route auf die Karte, und sie sieht schon günstiger aus.',
+        text: 'Er legt die neue Route auf die Karte, und die neuen Halte kosten weniger.',
         daten: {
           punkte: [
             { ort: 'Zug nach Wien', zeit: '08:00' },

@@ -3,6 +3,7 @@ import type { Scenario } from '../engine/types'
 export const wetter: Scenario = {
   id: 'wetter',
   titel: 'Wetter',
+  kurzname: 'Wetter',
   aufgabe: 'Brauche ich morgen in Graz einen Schirm?',
   art: 'api',
   stichwoerter: ['wetter', 'regen', 'schirm', 'sonne', 'temperatur', 'gewitter', 'schnee', 'wolken'],
@@ -24,7 +25,7 @@ export const wetter: Scenario = {
       text: 'Er überlegt: Für das Wetter von morgen frage ich lieber nach.',
       tiefer: [
         'Vorhersagen kommen von Messgeräten und Wolkenbildern, die ein Wetterdienst auswertet.',
-        'Er sucht deshalb einen Weg, wie er es herausfinden kann.',
+        'Ein Wetterdienst kennt die Vorhersage, darum sucht er dort nach.',
         'Dahinter steckt ein Sprachmodell, das ist ein Computerprogramm, das aus sehr vielen Texten gelernt hat.',
       ],
     },
@@ -72,7 +73,7 @@ export const wetter: Scenario = {
     },
     {
       id: 'ergebnis',
-      text: 'Und schon hast du deine Antwort, sie erscheint wie in einem Chat.',
+      text: 'Und schon hast du deine Antwort, die wie in einem Chat erscheint.',
     },
   ],
   ergebnis: 'Ja, nimm morgen einen Schirm mit, denn in Graz regnet es sehr wahrscheinlich.',

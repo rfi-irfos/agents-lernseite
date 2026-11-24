@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sentences, checkScenario, repeatedTrigrams, collect } from '../../scripts/copy-lib'
+import { sentences, checkScenario, repeatedTrigrams, collect, handelnTexte } from '../../scripts/copy-lib'
 import { scenario } from './fixtures'
 import { scenarios } from '../../src/scenarios'
 
@@ -81,6 +81,36 @@ describe('Regeln', () => {
     expect(u.some((x) => x.wo.includes('Schleifengrund'))).toBe(true)
     expect(u.some((x) => x.wo.includes('Schritt 1'))).toBe(true)
     expect(u.some((x) => x.wo.includes('Erklärung'))).toBe(true)
+  })
+})
+
+describe('Handeln-Daten auf dem Bildschirm', () => {
+  const mitDaten = (art: 'suche' | 'api' | 'code' | 'bild' | 'planung', daten: Record<string, unknown>) => {
+    const s = scenario()
+    s.art = art
+    s.stationen[5].daten = daten
+    return s
+  }
+  it('Fachwort, Verneinung, ASCII-Umlaut und gratis in Treffern werden gefunden', () => {
+    const f = checkScenario(mitDaten('suche', { treffer: [{ titel: 'Ein API Treffer', detail: 'keine Umstiege fuer dich, gratis' }] }))
+    const regeln = f.filter((x) => x.wo.includes('Treffer')).map((x) => x.regel)
+    expect(regeln).toEqual(expect.arrayContaining(['Fachwort', 'Verneinung', 'Umlaut', 'Gratis']))
+  })
+  it('api, Marker und Route werden geprüft', () => {
+    expect(checkScenario(mitDaten('api', { anfrage: 'Tokens bitte', antwort: 'ok' })).some((x) => x.wo.includes('Anfrage'))).toBe(true)
+    expect(checkScenario(mitDaten('bild', { src: 'pflanze', markierungen: [{ x: 1, y: 1, label: 'ohne Blatt' }] })).some((x) => x.wo.includes('Markierung'))).toBe(true)
+    expect(checkScenario(mitDaten('planung', { punkte: [{ ort: 'Zug fuer alle', zeit: '8:00' }] })).some((x) => x.wo.includes('Halt 1 Ort'))).toBe(true)
+  })
+  it('Codezeilen stehen im Prüfblatt, werden aber nicht geprüft; der Testname schon', () => {
+    const s = mitDaten('code', { zeilen: ['print(nie, fuer, API)'], test: { name: 'Test ohne Fehler', ok: true } })
+    expect(handelnTexte('code', s.stationen[5].daten).map((x) => x.wo)).toEqual(['Codezeile 1', 'Testname'])
+    const f = checkScenario(s).filter((x) => x.wo.includes('handeln/'))
+    expect(f.some((x) => x.wo.includes('Codezeile'))).toBe(false)
+    expect(f.some((x) => x.wo.includes('Testname') && x.regel === 'Verneinung')).toBe(true)
+  })
+  it('echte Daten erscheinen in collect', () => {
+    const u = collect(scenarios.find((x) => x.id === 'ausflug')!)
+    expect(u.some((x) => x.wo.includes('Halt 1 Ort'))).toBe(true)
   })
 })
 

@@ -47,6 +47,10 @@ describe('scenarios', () => {
   it('ausflug hat ein Gedächtnis im ersten Durchlauf', () => {
     expect(byId('ausflug').stationen.some((x) => x.gedaechtnis)).toBe(true)
   })
+  it('kurzname: kurz genug für schmale Karten, eindeutig', () => {
+    for (const s of scenarios) expect(s.kurzname && s.kurzname.length <= 8).toBe(true)
+    expect(new Set(scenarios.map((s) => s.kurzname)).size).toBe(scenarios.length)
+  })
   it('Beispielkarten: Text gleich der Aufgabe, eindeutige Aufgaben', () => {
     expect(new Set(scenarios.map((s) => s.aufgabe)).size).toBe(scenarios.length)
   })
