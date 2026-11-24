@@ -114,6 +114,37 @@ describe('Handeln-Daten auf dem Bildschirm', () => {
   })
 })
 
+describe('Plan, Werkzeugfrage und Karten auf dem Bildschirm', () => {
+  const regeln = (mut: (s: ReturnType<typeof scenario>) => void, teil: string) => {
+    const s = scenario()
+    mut(s)
+    return checkScenario(s).filter((f) => f.wo.includes(teil)).map((f) => f.regel)
+  }
+  it('Plan-Schritte', () => {
+    expect(regeln((s) => (s.stationen[3].daten = { schritte: ['Tokens zählen', 'ohne Pause', 'fuer alle'] }), 'Schritt')).toEqual(
+      expect.arrayContaining(['Fachwort', 'Verneinung', 'Umlaut']),
+    )
+  })
+  it('Frage und Erklärung', () => {
+    const w = (f: string, e: string) => (s: ReturnType<typeof scenario>) => {
+      s.stationen[4].werkzeug = { ...s.stationen[4].werkzeug!, frage: f, erklaerung: e }
+    }
+    expect(regeln(w('Welcher Prompt hilft?', 'Das ist gratis.'), '/Frage')).toContain('Fachwort')
+    expect(regeln(w('Welcher Prompt hilft?', 'Das ist gratis.'), 'Erklärung')).toContain('Gratis')
+    expect(regeln(w('Wo?', 'Es geht ohne Hilfe fuer alle.'), 'Erklärung')).toEqual(expect.arrayContaining(['Verneinung', 'Umlaut']))
+    expect(regeln(w('Wo?', Array(19).fill('wort').join(' ')), 'Erklärung')).toContain('Satzlänge')
+  })
+  it('Kartenbeschriftungen', () => {
+    const k = (label: string) => (s: ReturnType<typeof scenario>) => {
+      const w = s.stationen[4].werkzeug!
+      s.stationen[4].werkzeug = { ...w, karten: [{ icon: 'a', label }, w.karten[1], w.karten[2]] }
+    }
+    expect(regeln(k('LLM'), 'Karte 1')).toContain('Fachwort')
+    expect(regeln(k('Kein Tool'), 'Karte 1')).toContain('Verneinung')
+    expect(regeln(k('Rechner'), 'Karte 1')).toEqual([])
+  })
+})
+
 describe('echte Abläufe', () => {
   for (const s of scenarios) it(`${s.id}: 0 Funde`, () => expect(checkScenario(s)).toEqual([]))
 })

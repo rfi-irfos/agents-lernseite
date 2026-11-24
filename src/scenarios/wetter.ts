@@ -25,7 +25,7 @@ export const wetter: Scenario = {
       text: 'Er überlegt: Für das Wetter von morgen frage ich lieber nach.',
       tiefer: [
         'Vorhersagen kommen von Messgeräten und Wolkenbildern, die ein Wetterdienst auswertet.',
-        'Ein Wetterdienst kennt die Vorhersage, darum sucht er dort nach.',
+        'Darum fragt der Agent dort nach und verlässt sich auf die Messwerte.',
         'Dahinter steckt ein Sprachmodell, das ist ein Computerprogramm, das aus sehr vielen Texten gelernt hat.',
       ],
     },

@@ -90,6 +90,7 @@ export function collect(s: Scenario): Unit[] {
     if (st.werkzeug) {
       add(`${pre}${st.id}/Frage`, 'sonst', st.werkzeug.frage)
       add(`${pre}${st.id}/Erklärung`, 'sonst', st.werkzeug.erklaerung)
+      st.werkzeug.karten.forEach((k, i) => add(`${pre}${st.id}/Karte ${i + 1}`, 'daten', k.label))
     }
     if (st.id === 'handeln') handelnTexte(s.art, st.daten).forEach((h) => add(`${pre}${st.id}/${h.wo}`, h.art, h.text))
     const sch = st.daten?.schritte
@@ -146,10 +147,10 @@ export function checkScenario(s: Scenario): Fund[] {
       const n = sentences(u.text).length
       if (n > 1) funde.push({ regel: 'Satzanzahl', wo: u.wo, hinweis: `${n} Sätze statt einem` })
     }
-    if (u.art === 'text' || u.art === 'daten') {
+    if (u.art !== 'tiefer') {
       for (const j of JARGON) {
         if (new RegExp(`(^|[^\\p{L}\\p{N}])${j}s?($|[^\\p{L}\\p{N}])`, 'iu').test(u.text)) {
-          funde.push({ regel: 'Fachwort', wo: u.wo, hinweis: `„${j}“ im Text auf dem Bildschirm` })
+          funde.push({ regel: 'Fachwort', wo: u.wo, hinweis: `„${j}“ im Text auf dem Bildschirm (nur in tiefer mit Erklärung erlaubt)` })
         }
       }
     }
