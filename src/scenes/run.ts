@@ -1,5 +1,5 @@
 import { gsap } from 'gsap'
-import { QUIZ_TIMEOUT_MS, type Player } from '../engine/player'
+import type { Player } from '../engine/player'
 import type { Scenario } from '../engine/types'
 import type { Sound } from '../engine/sound'
 import type { Field } from '../fx/field'
@@ -42,7 +42,7 @@ export function runScenes(o: Opts): () => void {
   let tl: gsap.core.Timeline | null = null
   let token = 0
   let holding = false
-  let quizMs = 0
+  let calls: gsap.core.Tween[] = []
 
   const enter = () => {
     const my = ++token
@@ -50,7 +50,8 @@ export function runScenes(o: Opts): () => void {
     slots.buehne.replaceChildren()
     slots.text.querySelectorAll('.erzaehl').forEach((n) => n.remove())
     holding = false
-    quizMs = 0
+    calls.forEach((c) => c.kill())
+    calls = []
     const step = player.step
     app.dataset.station = step.station
     app.style.setProperty('--c', `var(--c-${step.station})`)
@@ -70,10 +71,25 @@ export function runScenes(o: Opts): () => void {
         hold: () => {
           if (my === token) holding = true
         },
+        resume: () => {
+          if (my === token && player.state === 'paused') player.play()
+        },
         answer: (i) => {
-          if (my !== token) return { richtig: false }
-          if (player.state === 'paused') player.play()
-          return player.answerQuiz(i)
+          if (my !== token) return
+          if (player.state !== 'paused') {
+            player.answerQuiz(i)
+            return
+          }
+          // Pause gilt: erst bei Weiter antworten (oder verfallen, wenn die Station gewechselt wird)
+          const off = player.on('state', (p) => {
+            if (my !== token) return off()
+            if (p.state === 'paused') return
+            off()
+            player.answerQuiz(i)
+          })
+        },
+        later: (seconds, fn) => {
+          calls.push(gsap.delayedCall(seconds, () => my === token && fn()))
         },
       },
     }
@@ -86,29 +102,27 @@ export function runScenes(o: Opts): () => void {
 
   const offStep = player.on('step', enter)
 
+  // Nach 8 s im Auto-Modus meldet der Player den Zeitablauf; die Oberfläche zeigt die Wahl des Agenten.
+  const offTimeout = player.on('quizTimeout', () => {
+    if (holding) return
+    const quiz = slots.buehne.querySelector('.quiz')
+    if (quiz) {
+      holding = true
+      quiz.dispatchEvent(new CustomEvent(AGENT_EVENT))
+    } else player.answerQuiz(player.step.script.werkzeug?.richtig ?? 0)
+  })
+
   const tick = (_t: number, dtMs: number) => {
-    const ms = Math.min(dtMs, MAX_DT)
-    if (player.state === 'quiz') {
-      if (holding) return
-      quizMs += ms
-      if (quizMs >= QUIZ_TIMEOUT_MS) {
-        const quiz = slots.buehne.querySelector('.quiz')
-        if (quiz) {
-          holding = true
-          quiz.dispatchEvent(new CustomEvent(AGENT_EVENT))
-          return
-        }
-        player.tick(ms)
-      }
-      return
-    }
-    player.tick(ms)
+    if (holding && player.state === 'quiz') return
+    player.tick(Math.min(dtMs, MAX_DT))
   }
   const auto = o.autoTick ?? autoTickDefault()
   if (auto) gsap.ticker.add(tick)
 
   return () => {
     offStep()
+    offTimeout()
+    calls.forEach((c) => c.kill())
     if (auto) gsap.ticker.remove(tick)
     tl?.kill()
   }

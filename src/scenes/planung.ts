@@ -1,6 +1,6 @@
 import { gsap } from 'gsap'
 import { de } from '../content/de'
-import { d, el, orbHop, startScene } from './common'
+import { d, el, tv, orbHop, startScene } from './common'
 import type { SceneBuilder } from './types'
 
 /** Schritte aus `daten.schritte`; ohne Angabe teilt sich der Erzählsatz an Kommas und „und“. */
@@ -42,10 +42,10 @@ export const planung: SceneBuilder = (ctx) => {
   gsap.set(nrs, { opacity: 0 })
   tl.fromTo(
     cards,
-    { opacity: 0, y: -24, rotation: () => gsap.utils.random(-6, 6) },
-    { opacity: 1, y: 0, rotation: 0, duration: d(ctx, 0.5), stagger: d(ctx, 0.25), clearProps: 'transform' },
+    tv(ctx, { opacity: 0, y: -24, rotation: () => gsap.utils.random(-6, 6) }),
+    tv(ctx, { opacity: 1, y: 0, rotation: 0, duration: d(ctx, 0.5), stagger: d(ctx, 0.25), clearProps: 'transform' }),
     'handlung',
   )
-  tl.to(nrs, { opacity: 1, duration: d(ctx, 0.3), stagger: d(ctx, 0.2) })
+  tl.to(nrs, { opacity: 1, duration: d(ctx, 0.3), stagger: ctx.reduced ? 0 : d(ctx, 0.2) })
   return tl
 }

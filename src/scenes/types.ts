@@ -7,8 +7,12 @@ import type { Sound } from '../engine/sound'
 export interface QuizCtl {
   /** Bei der Mitmach-Frage: Zeit anhalten, solange die Rückmeldung zu sehen ist. */
   hold(): void
-  /** Antwort an den Player geben (nimmt eine Pause zurück, damit kein Klick verloren geht). */
-  answer(i: 0 | 1 | 2): { richtig: boolean; erklaerung?: string }
+  /** Nur bei einem Tipp des Nutzers: eine Pause aufheben, damit der Klick nicht verloren geht. */
+  resume(): void
+  /** Antwort an den Player geben. Eine Pause bleibt bestehen, die Antwort wartet auf Weiter. */
+  answer(i: 0 | 1 | 2): void
+  /** Verzögerter Aufruf, der beim Verlassen der Station verfällt. */
+  later(seconds: number, fn: () => void): void
 }
 
 export interface SceneCtx {

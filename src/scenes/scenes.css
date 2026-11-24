@@ -302,6 +302,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .quizkarte {
-    transition-duration: 150ms;
+    transition: border-color 150ms ease, opacity 150ms ease, box-shadow 150ms ease;
+  }
+  .quizkarte[data-state='richtig'],
+  .quizkarte[data-agent='true'] {
+    transform: none;
   }
 }

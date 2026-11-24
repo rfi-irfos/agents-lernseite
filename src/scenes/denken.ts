@@ -1,6 +1,6 @@
 import { gsap } from 'gsap'
 import { de } from '../content/de'
-import { d, el, orbHop, startScene, svgBox } from './common'
+import { d, el, tv, orbHop, startScene, svgBox } from './common'
 import schublade from '../svg/schublade.svg?raw'
 import notiz from '../svg/notiz.svg?raw'
 import type { SceneBuilder } from './types'
@@ -33,10 +33,17 @@ export const denken: SceneBuilder = (ctx) => {
   stage.append(wrap)
 
   const lens = wege.map((w) => w.getTotalLength?.() ?? 400)
-  wege.forEach((w, i) => gsap.set(w, { strokeDasharray: lens[i], strokeDashoffset: lens[i] }))
   gsap.set(enden, { opacity: 0 })
-  tl.to(wege, { strokeDashoffset: 0, duration: d(ctx, 0.6), stagger: d(ctx, 0.2) }, 'handlung')
-  tl.to(enden, { opacity: 1, duration: d(ctx, 0.3), stagger: d(ctx, 0.2) }, '<')
+  if (ctx.reduced) {
+    // Überblenden statt Linien zeichnen
+    gsap.set(wege, { opacity: 0 })
+    tl.to(wege, { opacity: 1, duration: d(ctx, 0.2) }, 'handlung')
+    tl.to(enden, { opacity: 1, duration: d(ctx, 0.2) }, '<')
+  } else {
+    wege.forEach((w, i) => gsap.set(w, { strokeDasharray: lens[i], strokeDashoffset: lens[i] }))
+    tl.to(wege, { strokeDashoffset: 0, duration: d(ctx, 0.6), stagger: d(ctx, 0.2) }, 'handlung')
+    tl.to(enden, { opacity: 1, duration: d(ctx, 0.3), stagger: d(ctx, 0.2) }, '<')
+  }
   tl.call(() => {
     wege[gewaehlt].classList.add('gewaehlt')
     enden[gewaehlt].classList.add('gewaehlt')
@@ -64,8 +71,8 @@ export const denken: SceneBuilder = (ctx) => {
     tl.call(() => {
       lade.dataset.open = 'true'
     })
-    if (front) tl.fromTo(front, { y: 0 }, { y: 18, duration: d(ctx, 0.5) })
-    tl.fromTo(note, { opacity: 0, x: -40, y: 20 }, { opacity: 1, x: 0, y: 0, duration: d(ctx, 0.6), clearProps: 'transform' })
+    if (front && !ctx.reduced) tl.fromTo(front, { y: 0 }, { y: 18, duration: d(ctx, 0.5) })
+    tl.fromTo(note, tv(ctx, { opacity: 0, x: -40, y: 20 }), tv(ctx, { opacity: 1, x: 0, y: 0, duration: d(ctx, 0.6), clearProps: 'transform' }))
   }
   return tl
 }

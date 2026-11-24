@@ -3,7 +3,7 @@ import type { Step } from './steps'
 import { readingMs } from './reading-time'
 
 export type PlayerState = 'idle' | 'playing' | 'paused' | 'quiz' | 'transition' | 'done'
-type Ev = 'step' | 'quiz' | 'done' | 'state'
+type Ev = 'step' | 'quiz' | 'done' | 'state' | 'quizTimeout'
 type Nav = { kind: 'answer' } | { kind: 'next' } | { kind: 'prev' } | { kind: 'goTo'; i: number }
 
 const SHORT_MAX_MS = 2000
@@ -17,11 +17,12 @@ export class Player {
   private tempo: Tempo
   private progress = 0 // Anteil der Haltezeit, 0..1
   private quizMs = 0
+  private quizFired = false
   private resumeState: PlayerState = 'playing'
   private queued: Nav | null = null
   private pauseIntent: boolean | null = null // im Übergang gemerkt
   private listeners: Record<Ev, Set<(p: Player) => void>> = {
-    step: new Set(), quiz: new Set(), done: new Set(), state: new Set(),
+    step: new Set(), quiz: new Set(), done: new Set(), state: new Set(), quizTimeout: new Set(),
   }
 
   constructor(private readonly steps: Step[], opts: { auto?: boolean; tempo?: Tempo } = {}) {
@@ -99,9 +100,14 @@ export class Player {
       if (this.progress >= 1) this.advance()
     } else if (this._state === 'quiz') {
       this.quizMs += ms
-      if (this.quizMs >= QUIZ_TIMEOUT_MS) {
-        const w = this.step.script.werkzeug
-        if (w) this.answerQuiz(w.richtig)
+      if (this.quizMs >= QUIZ_TIMEOUT_MS && !this.quizFired) {
+        this.quizFired = true
+        // Hört jemand zu (die Oberfläche zeigt die Wahl des Agenten), entscheidet er; sonst antwortet der Player selbst.
+        if (this.listeners.quizTimeout.size) this.emit('quizTimeout')
+        else {
+          const w = this.step.script.werkzeug
+          if (w) this.answerQuiz(w.richtig)
+        }
       }
     }
   }
@@ -134,6 +140,7 @@ export class Player {
     this._index = i
     this.progress = 0
     this.quizMs = 0
+    this.quizFired = false
     const quiz = !!this.step.script.werkzeug
     const target = quiz ? 'quiz' : 'playing'
     if (this._state === 'paused') this.resumeState = target

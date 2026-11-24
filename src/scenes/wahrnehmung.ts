@@ -1,6 +1,6 @@
 import { gsap } from 'gsap'
 import { wordCards } from '../engine/matcher'
-import { d, el, orbHop, startScene, streamBetween, wichtigeWoerter } from './common'
+import { d, el, tv, orbHop, startScene, streamBetween, wichtigeWoerter } from './common'
 import type { SceneBuilder } from './types'
 
 /** Zerlegen: Der Satz fällt in Wortkarten auseinander, wichtige Wörter leuchten. */
@@ -30,8 +30,8 @@ export const wahrnehmung: SceneBuilder = (ctx) => {
   tl.call(() => ctx.sound.play('wisch'))
   tl.fromTo(
     cards,
-    { opacity: 0, y: () => gsap.utils.random(-28, -12), rotation: () => gsap.utils.random(-8, 8) },
-    { opacity: 1, y: 0, rotation: 0, duration: d(ctx, 0.5), stagger: d(ctx, 0.08), clearProps: 'transform' },
+    tv(ctx, { opacity: 0, y: () => gsap.utils.random(-28, -12), rotation: () => gsap.utils.random(-8, 8) }),
+    tv(ctx, { opacity: 1, y: 0, rotation: 0, duration: d(ctx, 0.5), stagger: d(ctx, 0.08), clearProps: 'transform' }),
     '>',
   )
   tl.to(satz, { opacity: 0.35, duration: d(ctx, 0.3) }, '<')
@@ -39,10 +39,12 @@ export const wahrnehmung: SceneBuilder = (ctx) => {
     cards.forEach((c) => c.dataset.wichtig === 'true' && c.classList.add('wichtig'))
     cards.find((c) => c.classList.contains('wichtig')) && streamBetween(ctx, satz, list, 700)
   })
-  tl.fromTo(
-    cards.filter((c) => c.dataset.wichtig === 'true'),
-    { scale: 1 },
-    { scale: 1.08, duration: d(ctx, 0.3), yoyo: true, repeat: 1, stagger: d(ctx, 0.15), clearProps: 'transform' },
-  )
+  if (!ctx.reduced) {
+    tl.fromTo(
+      cards.filter((c) => c.dataset.wichtig === 'true'),
+      { scale: 1 },
+      { scale: 1.08, duration: d(ctx, 0.3), yoyo: true, repeat: 1, stagger: d(ctx, 0.15), clearProps: 'transform' },
+    )
+  }
   return tl
 }

@@ -3,7 +3,7 @@ import { de } from '../content/de'
 import { readingMs } from '../engine/reading-time'
 import { isTest } from '../env'
 import { mountQuiz } from '../ui/quiz'
-import { d, el, orbHop, startScene, streamBetween } from './common'
+import { d, el, tv, orbHop, startScene, streamBetween } from './common'
 import { iconSvg } from './werkzeug-icons'
 import type { SceneBuilder } from './types'
 
@@ -29,7 +29,7 @@ export const werkzeug: SceneBuilder = (ctx) => {
     g.append(bild, cap)
     wrap.append(g)
     gsap.set(g, { opacity: 0 })
-    tl.fromTo(g, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: d(ctx, 0.5), clearProps: 'transform' }, 'handlung')
+    tl.fromTo(g, tv(ctx, { opacity: 0, y: 24 }), tv(ctx, { opacity: 1, y: 0, duration: d(ctx, 0.5), clearProps: 'transform' }), 'handlung')
     return tl
   }
 
@@ -37,6 +37,8 @@ export const werkzeug: SceneBuilder = (ctx) => {
   const q = ctx.step.script.werkzeug!
   const onPick = (i: 0 | 1 | 2) => {
     quiz.hold()
+    // Nur ein Tipp von Hand hebt eine Pause auf; der Agent respektiert sie
+    if (wrap.querySelector<HTMLElement>('.quiz')?.dataset.agent !== 'true') quiz.resume()
     const richtig = i === q.richtig
     const root = wrap.querySelector<HTMLElement>('.quiz')
     if (root) streamBetween(ctx, root.querySelectorAll('.quizkarte')[i], satz, 600)
@@ -55,7 +57,7 @@ export const werkzeug: SceneBuilder = (ctx) => {
       })
       wait = isTest() ? 0.5 : readingMs(q.erklaerung) / 1000
     }
-    gsap.delayedCall(wait, () => quiz.answer(i))
+    quiz.later(wait, () => quiz.answer(i))
   }
   tl.call(
     () => {
@@ -63,8 +65,8 @@ export const werkzeug: SceneBuilder = (ctx) => {
       const cards = wrap.querySelectorAll('.quizkarte')
       gsap.fromTo(
         cards,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: d(ctx, 0.5), stagger: d(ctx, 0.12), clearProps: 'transform', ease: 'power2.inOut' },
+        tv(ctx, { opacity: 0, y: 20 }),
+        tv(ctx, { opacity: 1, y: 0, duration: d(ctx, 0.5), stagger: d(ctx, 0.12), clearProps: 'transform', ease: 'power2.inOut' }),
       )
     },
     undefined,
