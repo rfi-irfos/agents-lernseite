@@ -44,6 +44,7 @@ export function runScenes(o: Opts): () => void {
   let holding = false
   let calls: gsap.core.Tween[] = []
   let safety: gsap.core.Tween | undefined
+  let first = true
 
   const enter = () => {
     const my = ++token
@@ -55,6 +56,9 @@ export function runScenes(o: Opts): () => void {
     calls.forEach((c) => c.kill())
     calls = []
     const step = player.step
+    // Ein Klang je Stationswechsel: der Schleifenstart meldet sich mit „hinweis“, sonst „wisch“; die erste Station nach dem Eintauchen bleibt still.
+    if (!first) o.sound.play(step.loopStart ? 'hinweis' : 'wisch')
+    first = false
     app.dataset.station = step.station
     app.style.setProperty('--c', `var(--c-${step.station})`)
     const ctx: SceneCtx = {

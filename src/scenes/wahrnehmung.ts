@@ -27,7 +27,6 @@ export const wahrnehmung: SceneBuilder = (ctx) => {
   stage.append(wrap)
 
   tl.fromTo(satz, { opacity: 0 }, { opacity: 1, duration: d(ctx, 0.3) }, 'handlung')
-  tl.call(() => ctx.sound.play('wisch'))
   tl.fromTo(
     cards,
     tv(ctx, { opacity: 0, y: () => gsap.utils.random(-28, -12), rotation: () => gsap.utils.random(-8, 8) }),
