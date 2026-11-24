@@ -64,10 +64,26 @@ test('reduzierte Bewegung: Überblendung höchstens 200 ms, kein scale am Eingab
     const id = setInterval(rec, 16)
     setTimeout(() => clearInterval(id), 2500)
   })
-  const t0 = Date.now()
-  await page.getByRole('button', { name: 'Ablauf starten' }).click()
-  await expect(page.locator('#app')).toHaveAttribute('data-phase', 'play', { timeout: 2000 })
-  expect(Date.now() - t0).toBeLessThan(1000)
+  const ms = await page.evaluate(
+    () =>
+      new Promise<{ play: number; done: number }>((res) => {
+        const t0 = performance.now()
+        let play = -1
+        const tick = () => {
+          const now = performance.now() - t0
+          if (play < 0 && document.getElementById('app')!.dataset.phase === 'play') play = now
+          if (!document.querySelector('.start-form')) return res({ play, done: now })
+          if (now > 3000) return res({ play, done: now })
+          requestAnimationFrame(tick)
+        }
+        document.querySelector<HTMLButtonElement>('.start-form button[type=submit]')!.click()
+        requestAnimationFrame(tick)
+      }),
+  )
+  // Ausblenden 100 ms + Einblenden 100 ms, dazu Taktspielraum
+  expect(ms.play).toBeGreaterThan(0)
+  expect(ms.play).toBeLessThanOrEqual(200)
+  expect(ms.done).toBeLessThanOrEqual(300)
   await page.waitForTimeout(400)
   const tf = await page.evaluate(() => (window as unknown as { __tf: string[] }).__tf)
   expect(tf.length).toBeGreaterThan(0)
@@ -75,4 +91,48 @@ test('reduzierte Bewegung: Überblendung höchstens 200 ms, kein scale am Eingab
   const stage = await page.evaluate(() => getComputedStyle(document.querySelector('[data-slot=buehne]')!).transform)
   expect(stage === 'none' || stage === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true)
   await ctx.close()
+})
+
+test('Eintauchen: das Eingabefeld wächst sichtbar zum Rahmen der Bühne', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('[data-card]').first().click()
+  await expect(page.getByRole('textbox')).toHaveValue(/.{20,}/, { timeout: 3000 })
+  const heights = await page.evaluate(
+    () =>
+      new Promise<number[]>((res) => {
+        const out: number[] = []
+        const t0 = performance.now()
+        const tick = () => {
+          const f = document.querySelector('.start-form')
+          if (f) out.push(Math.round(f.getBoundingClientRect().height))
+          if (performance.now() - t0 > 900) return res(out)
+          requestAnimationFrame(tick)
+        }
+        document.querySelector<HTMLButtonElement>('.start-form button[type=submit]')!.click()
+        requestAnimationFrame(tick)
+      }),
+  )
+  const first = heights[0]
+  const stageH = await page.evaluate(() => document.querySelector('[data-slot=buehne]')!.getBoundingClientRect().height)
+  expect(Math.max(...heights)).toBeGreaterThan(Math.max(first * 3, stageH * 0.8))
+  expect(new Set(heights).size).toBeGreaterThan(4) // weich, kein Sprung
+})
+
+test('freie Eingabe ohne Treffer zeigt den Beispiel-Hinweis, Karte nicht', async ({ page }) => {
+  await page.goto('/?test=1')
+  await page.getByRole('textbox').fill('xyz qqq')
+  await page.getByRole('button', { name: 'Ablauf starten' }).click()
+  await expect(
+    page.getByText('Das ist ein Beispiel. So ähnlich würde ein Agent deine Frage bearbeiten.'),
+  ).toBeVisible()
+  const ev = await page.evaluate(() => window.__events!.filter((e) => e.type === 'beispiel').length)
+  expect(ev).toBe(1)
+
+  await page.goto('/?test=1')
+  await page.locator('[data-card]').first().click()
+  await page.getByRole('button', { name: 'Ablauf starten' }).click()
+  await expect.poll(() => page.evaluate(() => window.__events!.filter((e) => e.type === 'step').length)).toBe(1)
+  await page.waitForTimeout(300)
+  await expect(page.getByText('Das ist ein Beispiel.')).toHaveCount(0)
+  expect(await page.evaluate(() => window.__events!.filter((e) => e.type === 'beispiel').length)).toBe(0)
 })
