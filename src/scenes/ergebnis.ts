@@ -21,6 +21,8 @@ export const ergebnis: SceneBuilder = (ctx) => {
   const slot = ctx.slots.eingabe
   slot.querySelectorAll('.chatblase').forEach((n) => n.remove())
   const blase = el('div', 'chatblase')
+  // Die Blase liegt im Eingabe-Slot (nicht live): sie meldet sich selbst, einmal, über ihren Text (kein aria-label).
+  blase.setAttribute('role', 'status')
   const name = el('span', 'chat-name')
   name.textContent = de.stationen.agent
   const antwort = el('p', 'chat-text')

@@ -134,6 +134,10 @@ test('Ergebnis: Chatblase sitzt am Platz des Eingabefelds, danach das Auftauchen
   await expect(bubble).toBeVisible()
   await expect(bubble).toContainText('Antwort fix-suche: Das ist das fertige Ergebnis für dich.')
   await expect(bubble).not.toContainText('Hier steht die fertige Antwort für dich.')
+  // genau eine Ansage: Statusbereich mit der Antwort als Text, ohne zusätzliches aria-label
+  await expect(bubble).toHaveAttribute('role', 'status')
+  await expect(bubble).not.toHaveAttribute('aria-label', /.+/)
+  await expect(page.locator('[role=status]', { hasText: 'Das ist das fertige Ergebnis für dich.' })).toHaveCount(1)
   const b = await bubble.evaluate((e) => {
     const r = e.getBoundingClientRect()
     return { x: r.left, y: r.top }
