@@ -11,6 +11,7 @@ import { watchFormat } from './engine/format'
 import { applyFormat } from './ui/layout'
 import { mountStart } from './ui/start'
 import { scenarios } from './scenarios'
+import { readingMs } from './engine/reading-time'
 import { buildSteps } from './engine/steps'
 import { Player } from './engine/player'
 import { Sound } from './engine/sound'
@@ -140,6 +141,7 @@ function launch(r: StartResult, tempo: Tempo, withDive: boolean): void {
         scenarios: all,
         seen: seenScenarios,
         onPick: pick,
+        lesezeitMs: readingMs(scenario.ergebnis, player.tempo),
       })
     })
     const stopScenes = runScenes({ app, player, field, scenario, eingabe, sound })

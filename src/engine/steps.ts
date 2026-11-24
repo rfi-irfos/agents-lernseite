@@ -5,7 +5,7 @@ export interface Step {
   script: StationScript
   pass: 1 | 2
   loopStart?: boolean
-  /** Zusätzlicher Lesetext der Station (bei Prüfen im ersten Durchlauf: der Schleifengrund). */
+  /** Zusätzlicher Lesetext der Station (bei Prüfen im ersten Durchlauf: der Schleifengrund, bei Ergebnis: die Antwort). */
   extraText?: string
 }
 
@@ -23,6 +23,7 @@ export function buildSteps(s: Scenario): Step[] {
     }
     const step: Step = { station: script.id, script, pass: 1 }
     if (s.schleife && script.id === 'pruefen') step.extraText = s.schleife.grund
+    if (script.id === 'ergebnis') step.extraText = s.ergebnis
     steps.push(step)
   })
   return steps

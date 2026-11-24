@@ -105,7 +105,7 @@ export const de = {
         'Ein Agent wird nur besser, wenn er Rückmeldung bekommt, sie speichert und beim nächsten Mal nutzt. Ohne Prüfung durch einen Menschen kann er auch schlechter werden.',
       verlaeufe: {
         besser: { label: 'Besser', satz: 'Mit Rückmeldung wird jede Runde ein Stück besser.' },
-        gleich: { label: 'Gleich', satz: 'Ohne Rückmeldung bleibt jede Runde gleich gut.' },
+        gleich: { label: 'Gleich', satz: 'Gleiche Rückmeldung, gleiche Runde: Der Agent bleibt auf seinem Stand.' },
         schlechter: { label: 'Schlechter', satz: 'Speichert der Agent Falsches, wird es mit jeder Runde schlechter.' },
       },
     },

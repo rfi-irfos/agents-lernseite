@@ -15,6 +15,8 @@ export interface RueckblickOpts {
   scenarios: Scenario[]
   seen: () => string[]
   onPick: (s: Scenario) => void
+  /** Lesezeit der Antwort in ms (Tempo eingerechnet): so lange bleibt die voll sichtbare Blase stehen. */
+  lesezeitMs: number
 }
 
 type Teil = 'kreislauf' | 'besser' | 'auswahl'
@@ -69,11 +71,16 @@ export function mountRueckblick(o: RueckblickOpts): () => void {
     })
   }
 
-  // Die Antwort-Blase und der letzte Szenentext blenden aus, dann beginnt der Kreislauf.
+  // Die Antwort-Blase bleibt, bis sie voll sichtbar war und ihre Lesezeit um ist; erst dann blendet alles aus.
   const old = [...Array.from(o.buehne.children), ...Array.from(o.text.children), ...Array.from(o.eingabe.children)]
-  // Die Pause gilt auch im Testmodus, damit der Done-Zustand beobachtbar bleibt.
-  const start = gsap.delayedCall(o.reduced ? 0.1 : 1.2, () => {
-    if (!alive) return
+  // Im Testmodus ohne echte Dauern genügt eine kurze feste Pause, damit der Done-Zustand beobachtbar bleibt.
+  const hold = dur(1) === 0 ? 1200 : Math.max(o.lesezeitMs, 100)
+  const began = performance.now()
+  let shownAt: number | null = null
+  let started = false
+  const begin = () => {
+    started = true
+    gsap.ticker.remove(poll)
     fade = gsap.to(old, {
       opacity: 0,
       duration: d(0.4),
@@ -83,11 +90,21 @@ export function mountRueckblick(o: RueckblickOpts): () => void {
         enter(0, false)
       },
     })
-  })
+  }
+  const poll = () => {
+    if (!alive || started) return gsap.ticker.remove(poll)
+    const now = performance.now()
+    const blase = o.eingabe.querySelector<HTMLElement>('.chatblase')
+    if (shownAt === null && blase && !gsap.isTweening(blase) && Number(getComputedStyle(blase).opacity) >= 0.99) shownAt = now
+    // Notausgang: ohne Blase zählt die Zeit seit done
+    if (shownAt !== null ? now - shownAt >= hold : !blase && now - began >= hold) begin()
+    else if (now - began > hold + 10_000) begin()
+  }
+  gsap.ticker.add(poll)
 
   return () => {
     alive = false
-    start.kill()
+    gsap.ticker.remove(poll)
     fade?.kill()
     handle?.kill()
   }

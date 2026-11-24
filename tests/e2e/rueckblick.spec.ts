@@ -121,7 +121,7 @@ test('Wird der Agent besser: drei Knöpfe, Merksatz wörtlich, Linie morpht stuf
   // gleich viele Befehle in jedem Zwischenbild
   for (const d of ds) expect(d.split(/(?=[ML])/).length).toBe(6)
   await page.locator('.rb-opt[data-curve=gleich]').click()
-  await expect(page.locator('.rb-satz')).toHaveText('Ohne Rückmeldung bleibt jede Runde gleich gut.')
+  await expect(page.locator('.rb-satz')).toHaveText('Gleiche Rückmeldung, gleiche Runde: Der Agent bleibt auf seinem Stand.')
 })
 
 test('reduzierte Bewegung: die Linie blendet höchstens 200 ms über, kein Zwischenbild', async ({ browser }) => {
