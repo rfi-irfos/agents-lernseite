@@ -21,9 +21,9 @@ export const wetter: Scenario = {
     },
     {
       id: 'denken',
-      text: 'Er überlegt: Das weiß ich nicht aus dem Kopf, dafür muss ich nachschauen.',
+      text: 'Er überlegt: Für das Wetter von morgen frage ich lieber nach.',
       tiefer: [
-        'Der Agent kennt das Wetter von morgen nicht, denn das steht in keinem Buch.',
+        'Das Wetter von morgen kann nur ein Wetterdienst wissen.',
         'Er sucht deshalb einen Weg, wie er es herausfinden kann.',
         'Dahinter steckt ein Sprachmodell, das ist ein Computerprogramm, das aus sehr vielen Texten gelernt hat.',
       ],
@@ -49,7 +49,7 @@ export const wetter: Scenario = {
         ],
         richtig: 0,
         erklaerung:
-          'Der Wetterdienst weiß, wie das Wetter morgen wird. Ein Taschenrechner rechnet nur, und im Fotoalbum liegen alte Bilder.',
+          'Der Wetterdienst weiß, wie das Wetter morgen wird. Ein Taschenrechner rechnet Zahlen aus, und im Fotoalbum liegen alte Bilder.',
       },
     },
     {
