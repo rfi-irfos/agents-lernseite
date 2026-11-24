@@ -26,7 +26,7 @@ export const ergebnis: SceneBuilder = (ctx) => {
   const name = el('span', 'chat-name')
   name.textContent = de.stationen.agent
   const antwort = el('p', 'chat-text')
-  antwort.textContent = ctx.step.script.text
+  antwort.textContent = ctx.scenario.ergebnis
   blase.append(name, antwort)
   slot.append(blase)
   // Ragt die Blase unten aus dem Bild (kleines Telefon), rückt sie nur so weit hoch, wie nötig.

@@ -116,13 +116,13 @@ describe('validateScenario', () => {
       expect(validateScenario(mit('planung', { punkte: [{ ort: 'Graz', zeit: '8:00' }] }))).toEqual([])
     })
     it('falsche Form für die Art', () => {
-      expect(has(mit('suche', { anfrage: 'a', antwort: 'b' }), 'daten passen nicht')).toBe(true)
-      expect(has(mit('code', { zeilen: ['x'], test: { name: 't' } }), 'daten passen nicht')).toBe(true)
-      expect(has(mit('planung', { punkte: [{ ort: 1, zeit: 'x' }] }), 'daten passen nicht')).toBe(true)
+      expect(has(mit('suche', { anfrage: 'a', antwort: 'b' }), 'passen nicht zur Art')).toBe(true)
+      expect(has(mit('code', { zeilen: ['x'], test: { name: 't' } }), 'passen nicht zur Art')).toBe(true)
+      expect(has(mit('planung', { punkte: [{ ort: 1, zeit: 'x' }] }), 'passen nicht zur Art')).toBe(true)
     })
     it('bild: keine Adresse im Netz', () => {
       for (const src of ['https://example.com/a.png', '//cdn/x.svg', 'a/b.svg']) {
-        expect(has(mit('bild', { src, markierungen: [] }), 'daten passen nicht')).toBe(true)
+        expect(has(mit('bild', { src, markierungen: [] }), 'passen nicht zur Art')).toBe(true)
       }
     })
     it('zweiter Durchlauf wird mitgeprüft', () => {

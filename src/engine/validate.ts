@@ -48,12 +48,13 @@ export function validateScenario(s: Scenario): string[] {
     second.forEach((st) => checkStation(st, `${s.id}/zweiter Durchlauf/${st.id}`, out))
   }
 
-  const handeln = [s.stationen.find((x) => x.id === 'handeln'), ...second.filter((x) => x.id === 'handeln')]
-  handeln.forEach((st, i) => {
-    if (st?.daten !== undefined && !parseHandelnDaten(s.art, st.daten)) {
-      out.push(`${s.id}/handeln${i ? ' (zweiter Durchlauf)' : ''}: daten passen nicht zur Art „${s.art}“.`)
-    }
-  })
+  const erster = s.stationen.find((x) => x.id === 'handeln')
+  const zweiter = second.find((x) => x.id === 'handeln')
+  const checkDaten = (st: StationScript | undefined, where: string) => {
+    if (!st || !parseHandelnDaten(s.art, st.daten)) out.push(`${where}: daten fehlen oder passen nicht zur Art „${s.art}“.`)
+  }
+  checkDaten(erster, `${s.id}/handeln`)
+  if (s.schleife) checkDaten(zweiter, `${s.id}/handeln (zweiter Durchlauf)`)
 
   const quizzes = [...s.stationen, ...second].filter((x) => x.werkzeug).length
   if (quizzes !== 1) {
