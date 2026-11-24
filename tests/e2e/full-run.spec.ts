@@ -24,7 +24,7 @@ async function check(page: Page, label: string): Promise<void> {
       if (!el) { bad.push(`${s} fehlt`); continue }
       const r = el.getBoundingClientRect()
       if (r.left < -0.5 || r.top < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) bad.push(`${s} ragt aus dem Bild`)
-      if (s !== 'fx' && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) bad.push(`${s} läuft über`)
+      if (s !== 'fx' && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) bad.push(`${s} läuft über (${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight}) ${el.className} ${el.innerHTML.slice(0, 200)}`)
     }
     return { sh: se.scrollHeight, sw: se.scrollWidth, ih: innerHeight, iw: innerWidth, bad }
   }, [...SLOTS])
