@@ -131,3 +131,25 @@ test('reduzierte Bewegung: Formatwechsel ohne Flug, Endlage sofort nach 250 ms',
   expect(ok).toBe(true)
   await ctx.close()
 })
+
+test('reduzierte Bewegung: der zuletzt angeforderte Wechsel gewinnt, auch mitten in der Überblendung', async ({ browser }) => {
+  const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 360, height: 740 } })
+  const page = await ctx.newPage()
+  await page.goto('/')
+  await expect(page.locator('#app')).toHaveAttribute('data-format', 'hoch')
+  await page.evaluate(async () => {
+    const mod = await import(/* @vite-ignore */ '/src/ui/layout.ts')
+    mod.applyFormat('quer')
+    await new Promise((r) => setTimeout(r, 30))
+    mod.applyFormat('hoch')
+  })
+  await page.waitForTimeout(500)
+  await expect(page.locator('#app')).toHaveAttribute('data-format', 'hoch')
+  const vis = await page.evaluate(() => ({
+    op: getComputedStyle(document.querySelector('#app')!).opacity,
+    tr: getComputedStyle(document.querySelector('[data-slot=buehne]')!).transform,
+  }))
+  expect(vis.op).toBe('1')
+  expect(vis.tr).toBe('none')
+  await ctx.close()
+})
