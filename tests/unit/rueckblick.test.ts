@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { VERLAEUFE, pathFor } from '../../src/scenes/rueckblick/besser'
+import { beginAt, GRACE_MS } from '../../src/scenes/rueckblick'
 import { de } from '../../src/content/de'
 
 describe('Rückblick: Lernkurve', () => {
@@ -28,5 +29,19 @@ describe('Rückblick: Texte positiv formuliert', () => {
       ...Object.values(r.besser.verlaeufe).flatMap((v) => [v.label, v.satz]), r.auswahl.titel,
     ].join(' ')
     expect(all).not.toMatch(/\b(nicht|kein\w*|ohne|nie|niemals|nichts)\b/i)
+  })
+})
+
+describe('Rückblick: Lesezeit der Antwort wird nur einmal gewartet', () => {
+  it('Haltezeit im Schritt schon abgelaufen: nur kurze Nachfrist nach done', () => {
+    // Blase ab 1000 sichtbar, Lesezeit 3000, done bei 4200
+    expect(beginAt(1000, 4200, 3000)).toBe(4200 + GRACE_MS)
+    expect(GRACE_MS).toBeLessThanOrEqual(700)
+  })
+  it('Lesezeit läuft noch: nur die Restzeit', () => {
+    expect(beginAt(1000, 2500, 3000)).toBe(4000)
+  })
+  it('Schritt übersprungen (Blase erst bei done sichtbar): volle Lesezeit', () => {
+    expect(beginAt(5000, 5000, 3000)).toBe(8000)
   })
 })

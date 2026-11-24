@@ -67,7 +67,6 @@ export const de = {
     zurueckZuDenken: 'Die Daten-Kugel fliegt zurück zu Denken.',
     fertig: 'Fertig',
     agent: 'Agent',
-    antwortDesAgenten: 'Antwort des Agenten',
   },
   rueckblick: {
     weiter: 'Weiter',

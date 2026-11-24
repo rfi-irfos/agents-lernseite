@@ -21,8 +21,6 @@ export const ergebnis: SceneBuilder = (ctx) => {
   const slot = ctx.slots.eingabe
   slot.querySelectorAll('.chatblase').forEach((n) => n.remove())
   const blase = el('div', 'chatblase')
-  blase.setAttribute('role', 'status')
-  blase.setAttribute('aria-label', de.stationen.antwortDesAgenten)
   const name = el('span', 'chat-name')
   name.textContent = de.stationen.agent
   const antwort = el('p', 'chat-text')
@@ -48,6 +46,8 @@ export const ergebnis: SceneBuilder = (ctx) => {
     tv(ctx, { opacity: 1, y: 0, scale: 1, duration: d(ctx, 0.5), clearProps: 'transform' }),
     `+=${d(ctx, 0.2)}`,
   )
+  // Merkt den Moment, ab dem die Antwort voll lesbar ist: der Rückblick wartet nur die Restzeit.
+  tl.call(() => { blase.dataset.shownAt = String(performance.now()) })
   tl.call(() => {
     pushEvent({ type: 'auftauchen' })
     void ctx.field.surface(d(ctx, 0.8) * 1000)

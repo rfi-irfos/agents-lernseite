@@ -19,6 +19,18 @@ export interface RueckblickOpts {
   lesezeitMs: number
 }
 
+/** Kurze Nachfrist, wenn der Ablauf die Haltezeit der Antwort schon selbst abgewartet hat. */
+export const GRACE_MS = 600
+
+/**
+ * Zeitpunkt, an dem der Rückblick beginnt: Ende der Lesezeit (ab voll sichtbarer Blase), aber mindestens
+ * `GRACE_MS` nach `done`. Wurde der Schritt übersprungen, ist die Blase erst kurz vor `done` sichtbar,
+ * dann gilt praktisch die volle Lesezeit.
+ */
+export function beginAt(shownAt: number, doneAt: number, holdMs: number): number {
+  return Math.max(shownAt + holdMs, doneAt + GRACE_MS)
+}
+
 type Teil = 'kreislauf' | 'besser' | 'auswahl'
 const TEILE: Teil[] = ['kreislauf', 'besser', 'auswahl']
 
@@ -95,9 +107,13 @@ export function mountRueckblick(o: RueckblickOpts): () => void {
     if (!alive || started) return gsap.ticker.remove(poll)
     const now = performance.now()
     const blase = o.eingabe.querySelector<HTMLElement>('.chatblase')
-    if (shownAt === null && blase && !gsap.isTweening(blase) && Number(getComputedStyle(blase).opacity) >= 0.99) shownAt = now
+    if (shownAt === null && blase) {
+      const marked = Number(blase.dataset.shownAt)
+      if (marked > 0) shownAt = marked
+      else if (!gsap.isTweening(blase) && Number(getComputedStyle(blase).opacity) >= 0.99) shownAt = now
+    }
     // Notausgang: ohne Blase zählt die Zeit seit done
-    if (shownAt !== null ? now - shownAt >= hold : !blase && now - began >= hold) begin()
+    if (shownAt !== null ? now >= beginAt(shownAt, began, hold) : !blase && now - began >= hold) begin()
     else if (now - began > hold + 10_000) begin()
   }
   gsap.ticker.add(poll)
