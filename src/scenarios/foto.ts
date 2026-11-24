@@ -9,7 +9,7 @@ export const foto: Scenario = {
   stationen: [
     {
       id: 'eingabe',
-      text: 'Du zeigst dem Agenten ein Foto und fragst, was für eine Pflanze das ist.',
+      text: 'Du hängst ein Foto an deine Nachricht, und der Agent bekommt es.',
     },
     {
       id: 'wahrnehmung',
@@ -29,7 +29,7 @@ export const foto: Scenario = {
     },
     {
       id: 'planung',
-      text: 'Sein Plan: das Foto abtasten, die Merkmale sammeln und mit Pflanzen aus seinem Wissen vergleichen.',
+      text: 'Er ordnet seine Arbeit in drei Schritte.',
       daten: { schritte: ['Foto abtasten', 'Merkmale sammeln', 'Mit bekannten Pflanzen vergleichen'] },
     },
     {
@@ -37,7 +37,7 @@ export const foto: Scenario = {
       text: 'Dafür nimmt er das Werkzeug, das Bilder ansehen kann.',
       tiefer: [
         'Für jede Art von Aufgabe gibt es ein passendes Werkzeug im Kasten des Agenten.',
-        'Hier ist es eine Bilderkennung, die auf Fotos nach Umrissen sucht.',
+        'Die Bilderkennung ist für Bilder gebaut, so wie eine Säge für Holz.',
       ],
       werkzeug: {
         frage: 'Welches Werkzeug erkennt, was auf einem Foto zu sehen ist?',
@@ -55,7 +55,7 @@ export const foto: Scenario = {
       id: 'handeln',
       text: 'Eine Linie tastet das Foto ab, und die wichtigen Stellen leuchten auf.',
       tiefer: [
-        'Die Linie zeigt, wie der Agent ein Bild Stück für Stück anschaut.',
+        'Die Linie ist nur ein Bild dafür: Der Agent schaut sich das ganze Foto auf einmal an.',
         'Jede leuchtende Stelle ist ein Merkmal, das ihm bei der Antwort hilft.',
       ],
       daten: {

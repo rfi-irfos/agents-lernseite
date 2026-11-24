@@ -9,13 +9,13 @@ export const flugsuche: Scenario = {
   stationen: [
     {
       id: 'eingabe',
-      text: 'Du bittest den Agenten, den günstigsten Flug von Graz nach Berlin am Freitag zu finden.',
+      text: 'Du schickst deine Bitte ab, und der Agent fängt sofort an.',
     },
     {
       id: 'wahrnehmung',
       text: 'Er zerlegt deinen Satz und merkt sich: Flug, Graz, Berlin, Freitag und günstig.',
       tiefer: [
-        'Der Agent liest jedes Wort einzeln, so wie du beim Lesen Wort für Wort.',
+        'Der Agent liest jedes Wort einzeln, genau wie du beim Lesen.',
         'Orte und Tage verraten ihm, wohin und wann du fliegen willst.',
       ],
     },
@@ -29,7 +29,7 @@ export const flugsuche: Scenario = {
     },
     {
       id: 'planung',
-      text: 'Sein Plan: Flüge für Freitag suchen, die Preise vergleichen und den günstigsten auswählen.',
+      text: 'Er legt sich drei Schritte zurecht.',
       daten: { schritte: ['Flüge für Freitag suchen', 'Preise vergleichen', 'Günstigsten auswählen'] },
     },
     {
@@ -76,7 +76,7 @@ export const flugsuche: Scenario = {
     },
   ],
   schleife: {
-    grund: 'Das dauert den halben Tag, darum geht er zurück zum Denken und sucht einen direkten Flug.',
+    grund: 'Zwei Umstiege kosten den halben Tag, darum geht er zurück zum Denken und sucht einen direkten Flug.',
     zweiterDurchlauf: [
       {
         id: 'denken',
@@ -88,7 +88,7 @@ export const flugsuche: Scenario = {
       },
       {
         id: 'planung',
-        text: 'Neuer Plan: direkte Flüge am Freitag suchen und danach den Preis prüfen.',
+        text: 'Dafür entwirft er einen neuen, kürzeren Plan.',
         daten: { schritte: ['Direkte Flüge suchen', 'Preis prüfen'] },
       },
       {

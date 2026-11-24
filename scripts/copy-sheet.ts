@@ -24,12 +24,17 @@ function station(st: StationScript): string {
 }
 
 function ablauf(s: Scenario): string {
+  // Reihenfolge wie beim Abspielen: erster Durchlauf bis Prüfen, zweiter Durchlauf, dann Ergebnis.
+  const last = s.stationen.length - 1
+  const erste = s.stationen.slice(0, last)
+  const ende = s.stationen[last]
   const second = s.schleife
     ? `<h3>Schleife</h3><p class="neben"><b>Grund:</b> ${esc(s.schleife.grund)}</p>${s.schleife.zweiterDurchlauf.map(station).join('')}`
     : ''
   return `<article><h2>${esc(s.titel)} <small>${esc(s.id)} · ${esc(s.art)}</small></h2>
 <p class="aufgabe"><b>Aufgabe:</b> ${esc(s.aufgabe)}</p>
-<h3>Erster Durchlauf</h3>${s.stationen.map(station).join('')}${second}
+<h3>Erster Durchlauf</h3>${erste.map(station).join('')}${second}
+<h3>Schluss</h3>${station(ende)}
 <h3>Antwort</h3><p class="text">${esc(s.ergebnis)}</p></article>`
 }
 

@@ -3,13 +3,13 @@ import type { Scenario } from '../engine/types'
 export const ausflug: Scenario = {
   id: 'ausflug',
   titel: 'Ausflug planen',
-  aufgabe: 'Plan einen Schulausflug nach Wien für 25 Kinder.',
+  aufgabe: 'Plane einen Schulausflug nach Wien für 25 Kinder.',
   art: 'planung',
   stichwoerter: ['ausflug', 'klassenfahrt', 'wandertag', 'exkursion', 'schulreise', 'kinder'],
   stationen: [
     {
       id: 'eingabe',
-      text: 'Du bittest den Agenten, einen Schulausflug nach Wien für 25 Kinder zu planen.',
+      text: 'Du schickst den Auftrag ab, und der Agent beginnt mit dem Plan.',
     },
     {
       id: 'wahrnehmung',
@@ -30,7 +30,7 @@ export const ausflug: Scenario = {
     },
     {
       id: 'planung',
-      text: 'Sein Plan: Zug suchen, Ziele auswählen, die Gesamtkosten ausrechnen und alles in Reihenfolge legen.',
+      text: 'Er sortiert die Aufgabe in vier Schritte.',
       daten: { schritte: ['Zug suchen', 'Ziele auswählen', 'Kosten ausrechnen', 'Tag in Reihenfolge legen'] },
     },
     {
@@ -85,13 +85,13 @@ export const ausflug: Scenario = {
         id: 'denken',
         text: 'Jetzt überlegt er neu: Ein Museum mit Gruppenpreis und ein Park mit freiem Eintritt sparen viel Geld.',
         tiefer: [
-          'Die Klassenkasse bleibt der Maßstab, den der Agent aus seiner Notiz kennt.',
+          'Die Klassenkasse setzt die Grenze, die der Agent aus seiner Notiz kennt.',
           'Wer sparen will, sucht Ziele mit ähnlichem Spaß und kleinerem Preis.',
         ],
       },
       {
         id: 'planung',
-        text: 'Neuer Plan: Zug behalten, Tiergarten und Riesenrad streichen, Museum und Stadtpark einplanen.',
+        text: 'Bei den Zielen ändert er seinen Plan, den Zug behält er.',
         daten: { schritte: ['Zug behalten', 'Tiergarten und Riesenrad streichen', 'Museum und Stadtpark einplanen'] },
       },
       {
@@ -113,9 +113,9 @@ export const ausflug: Scenario = {
       },
       {
         id: 'pruefen',
-        text: 'Er rechnet erneut: Der Plan kostet 400 Euro und passt in die Klassenkasse.',
+        text: 'Er rechnet erneut: Jetzt passt der Plan in die Klassenkasse.',
       },
     ],
   },
-  ergebnis: 'Der Plan: Zug um 8:00, Museum, Picknick im Stadtpark und Rückfahrt um 16:00 für 400 Euro.',
+  ergebnis: 'Dein Plan: Um 8:00 fährt der Zug los. Dann kommen Museum und Picknick, und um 16:00 geht es zurück. Alles zusammen kostet 400 Euro.',
 }

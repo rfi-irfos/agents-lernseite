@@ -9,7 +9,7 @@ export const programm: Scenario = {
   stationen: [
     {
       id: 'eingabe',
-      text: 'Du bittest den Agenten um ein kleines Programm, das deine Einkaufsliste sortiert.',
+      text: 'Du sendest deinen Wunsch ab, und der Agent beginnt zu lesen.',
     },
     {
       id: 'wahrnehmung',
@@ -29,7 +29,7 @@ export const programm: Scenario = {
     },
     {
       id: 'planung',
-      text: 'Sein Plan: das Programm schreiben, einen Test dafür bauen und alles ausprobieren.',
+      text: 'Er teilt die Arbeit in drei kleine Schritte auf.',
       daten: { schritte: ['Programm schreiben', 'Test bauen', 'Alles ausprobieren'] },
     },
     {
@@ -85,7 +85,7 @@ export const programm: Scenario = {
       },
       {
         id: 'planung',
-        text: 'Neuer Plan: genau diese Zeile ändern und den Test noch einmal starten.',
+        text: 'Er macht einen neuen Plan, der nur eine Zeile betrifft.',
         daten: { schritte: ['Zeile ändern', 'Test wiederholen'] },
       },
       {
@@ -94,7 +94,7 @@ export const programm: Scenario = {
       },
       {
         id: 'handeln',
-        text: 'Er ändert die Zeile, startet den Test, und diesmal leuchtet er grün.',
+        text: 'Er ändert die Zeile und startet den Test, und diesmal leuchtet er grün.',
         daten: {
           zeilen: ['einkauf = ["Milch", "Brot", "Apfel"]', 'einkauf.sort()', 'print(einkauf)'],
           test: { name: 'Apfel steht vor Brot und Milch', ok: true },
@@ -102,7 +102,7 @@ export const programm: Scenario = {
       },
       {
         id: 'pruefen',
-        text: 'Jetzt ist der Test grün, und das Programm erfüllt deine Aufgabe.',
+        text: 'Jetzt stimmt alles, und das Programm erfüllt deine Aufgabe.',
         kurz: true,
       },
     ],

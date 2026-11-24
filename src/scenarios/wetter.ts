@@ -9,7 +9,7 @@ export const wetter: Scenario = {
   stationen: [
     {
       id: 'eingabe',
-      text: 'Du fragst, ob du morgen in Graz einen Schirm brauchst.',
+      text: 'Du schickst deine Frage ab, und der Agent bekommt sie.',
     },
     {
       id: 'wahrnehmung',
@@ -62,7 +62,7 @@ export const wetter: Scenario = {
       ],
       daten: {
         anfrage: 'Wetterdienst, wie wird das Wetter morgen in Graz?',
-        antwort: 'Für Graz sagt der Wetterdienst morgen 80 % Regen voraus.',
+        antwort: 'Für Graz sagt der Wetterdienst morgen 80 % Regenwahrscheinlichkeit voraus.',
       },
     },
     {
@@ -75,5 +75,5 @@ export const wetter: Scenario = {
       text: 'Und schon hast du deine Antwort, sie erscheint wie in einem Chat.',
     },
   ],
-  ergebnis: 'Ja, nimm morgen einen Schirm mit, denn für Graz sind 80 % Regen angesagt.',
+  ergebnis: 'Ja, nimm morgen einen Schirm mit, denn in Graz regnet es sehr wahrscheinlich.',
 }
