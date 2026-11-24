@@ -60,7 +60,7 @@ test('reduzierte Bewegung: Überblendung höchstens 200 ms, kein scale am Eingab
     const w = window as unknown as { __tf: string[] }
     w.__tf = []
     const input = document.querySelector('input,textarea') as HTMLElement
-    const rec = () => w.__tf.push(getComputedStyle(input).transform)
+    const rec = () => { if (input.isConnected) w.__tf.push(getComputedStyle(input).transform) }
     const id = setInterval(rec, 16)
     setTimeout(() => clearInterval(id), 2500)
   })
@@ -70,6 +70,7 @@ test('reduzierte Bewegung: Überblendung höchstens 200 ms, kein scale am Eingab
   expect(Date.now() - t0).toBeLessThan(1000)
   await page.waitForTimeout(400)
   const tf = await page.evaluate(() => (window as unknown as { __tf: string[] }).__tf)
+  expect(tf.length).toBeGreaterThan(0)
   for (const t of tf) expect(t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true)
   const stage = await page.evaluate(() => getComputedStyle(document.querySelector('[data-slot=buehne]')!).transform)
   expect(stage === 'none' || stage === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true)
