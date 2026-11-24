@@ -21,9 +21,18 @@ export function reducedMotion(): boolean {
   return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/** Dauer in Sekunden; im Testmodus immer 0. */
+/** `?motion=1` lässt im Testmodus die echten Dauern laufen (für Bewegungs-Tests). */
+function realMotion(): boolean {
+  try {
+    return new URLSearchParams(location.search).get('motion') === '1'
+  } catch {
+    return false
+  }
+}
+
+/** Dauer in Sekunden; im Testmodus 0, außer mit `&motion=1`. */
 export function dur(seconds: number): number {
-  return isTest() ? 0 : seconds
+  return isTest() && !realMotion() ? 0 : seconds
 }
 
 export function pushEvent(e: AppEvent): void {

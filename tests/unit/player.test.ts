@@ -225,4 +225,26 @@ describe('Player', () => {
       expect(p.state).toBe('paused')
     })
   })
+
+  it('Quiz-Zeitablauf meldet sich einmal als Ereignis, nur im Auto-Modus', () => {
+    const on = new Player(steps(), { auto: true })
+    const fired = vi.fn()
+    on.on('quizTimeout', fired)
+    toQuiz(on)
+    on.tick(7999)
+    expect(fired).not.toHaveBeenCalled()
+    on.tick(1)
+    on.tick(5000)
+    expect(fired).toHaveBeenCalledTimes(1)
+    expect(on.state).toBe('quiz') // wer das Ereignis hört, entscheidet selbst
+
+    const off = new Player(steps(), { auto: true })
+    const none = vi.fn()
+    off.on('quizTimeout', none)
+    toQuiz(off)
+    off.setAuto(false)
+    off.tick(20000)
+    expect(none).not.toHaveBeenCalled()
+    expect(off.state).toBe('quiz')
+  })
 })
