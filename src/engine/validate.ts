@@ -20,7 +20,7 @@ function checkStation(st: StationScript, where: string, out: string[]): void {
   const words = text.split(/\s+/).filter(Boolean).length
   if (words > MAX_WORDS) out.push(`${where}: Der Text hat ${words} Wörter, erlaubt sind ${MAX_WORDS}.`)
   for (const w of JARGON) {
-    if (new RegExp(`(^|[^\\p{L}\\p{N}])${w}($|[^\\p{L}\\p{N}])`, 'iu').test(text)) {
+    if (new RegExp(`(^|[^\\p{L}\\p{N}])${w}s?($|[^\\p{L}\\p{N}])`, 'iu').test(text)) {
       out.push(`${where}: Fachwort „${w}“ im Text.`)
     }
   }
@@ -56,9 +56,21 @@ export function validateScenario(s: Scenario): string[] {
   checkDaten(erster, `${s.id}/handeln`)
   if (s.schleife) checkDaten(zweiter, `${s.id}/handeln (zweiter Durchlauf)`)
 
-  const quizzes = [...s.stationen, ...second].filter((x) => x.werkzeug).length
-  if (quizzes !== 1) {
-    out.push(`${s.id}: Es muss genau eine Werkzeugfrage geben, gefunden: ${quizzes}.`)
+  // R2: die eine Werkzeugfrage steht im ersten Durchlauf, der zweite hat keine.
+  const imErsten = s.stationen.filter((x) => x.werkzeug).length
+  const imZweiten = second.filter((x) => x.werkzeug).length
+  if (imErsten !== 1) {
+    out.push(`${s.id}: Es muss genau eine Werkzeugfrage im ersten Durchlauf geben, gefunden: ${imErsten}.`)
+  }
+  if (imZweiten > 0) {
+    out.push(`${s.id}: Es muss genau eine Werkzeugfrage geben, und der zweite Durchlauf darf keine haben (gefunden: ${imZweiten}).`)
+  }
+
+  if (s.art === 'code' && s.schleife) {
+    const e = parseHandelnDaten('code', erster?.daten)
+    const z = parseHandelnDaten('code', zweiter?.daten)
+    if (e && e.test.ok) out.push(`${s.id}/handeln: test.ok muss im ersten Durchlauf false sein, weil eine Schleife folgt.`)
+    if (z && !z.test.ok) out.push(`${s.id}/handeln (zweiter Durchlauf): test.ok muss true sein.`)
   }
   return out
 }

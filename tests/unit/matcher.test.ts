@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchScenario, wordCards } from '../../src/engine/matcher'
+import { matchScenario, normalize, wordCards } from '../../src/engine/matcher'
 import { scenario } from './fixtures'
 
 const mk = (id: string, kw: string[]) => ({ ...scenario(), id, stichwoerter: kw })
@@ -27,6 +27,10 @@ describe('matchScenario', () => {
   it('Umlaute normalisiert', () => {
     expect(matchScenario('Etwas für mich', all).scenario.id).toBe('ausflug')
     expect(matchScenario('Etwas fuer mich', all).scenario.id).toBe('ausflug')
+  })
+  it('zerlegte Umlaute (NFD) werden wie zusammengesetzte behandelt', () => {
+    expect(normalize('Fu\u0308r Scho\u0308n Gru\u0308ße')).toBe('fuer schoen gruesse')
+    expect(matchScenario('Etwas fu\u0308r mich', all).scenario.id).toBe('ausflug')
   })
   it('Gleichstand: erster gewinnt', () => {
     expect(matchScenario('flug und foto', all).scenario.id).toBe('flugsuche')

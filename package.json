@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "npm run check-copy && vitest run",
+    "check-copy": "esbuild scripts/check-copy.ts --bundle --platform=node --format=esm --outfile=test-out/check-copy.mjs --log-level=warning && node test-out/check-copy.mjs",
+    "copy-sheet": "esbuild scripts/copy-sheet.ts --bundle --platform=node --format=esm --outfile=test-out/copy-sheet.mjs --log-level=warning && node test-out/copy-sheet.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.1"

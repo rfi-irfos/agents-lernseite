@@ -3,6 +3,7 @@ import { de } from '../content/de'
 import { dur, reducedMotion } from '../env'
 import { matchScenario } from '../engine/matcher'
 import type { Scenario } from '../engine/types'
+import { scenarios as beispiele } from '../scenarios'
 
 export interface StartResult {
   scenario: Scenario
@@ -70,7 +71,8 @@ export function mountStart(
   }
 
   const cardButtons: HTMLButtonElement[] = []
-  for (const k of de.start.karten) {
+  // Beispielkarten kommen aus den Abläufen: Kartentext = Aufgabe, eine einzige Quelle.
+  for (const k of beispiele) {
     const li = el('li')
     const b = el('button', 'glass')
     b.type = 'button'

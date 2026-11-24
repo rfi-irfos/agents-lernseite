@@ -2,6 +2,7 @@ import type { Scenario } from './types'
 
 export function normalize(t: string): string {
   return t
+    .normalize('NFC')
     .toLowerCase()
     .replace(/ä/g, 'ae')
     .replace(/ö/g, 'oe')

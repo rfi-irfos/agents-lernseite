@@ -31,6 +31,18 @@ describe('validateScenario', () => {
     s.schleife!.zweiterDurchlauf[2].werkzeug = frage
     expect(has(s, 'genau eine')).toBe(true)
   })
+  it('Werkzeugfrage im zweiten Durchlauf ist nicht erlaubt, auch wenn der erste eine hat', () => {
+    const s = scenario(true)
+    expect(validateScenario(s)).toEqual([])
+    s.schleife!.zweiterDurchlauf[2].werkzeug = frage
+    expect(has(s, 'zweite Durchlauf darf keine')).toBe(true)
+  })
+  it('Werkzeugfrage nur im zweiten Durchlauf zählt nicht als die eine', () => {
+    const s = scenario(true)
+    delete s.stationen[4].werkzeug
+    s.schleife!.zweiterDurchlauf[2].werkzeug = frage
+    expect(has(s, 'ersten Durchlauf')).toBe(true)
+  })
   it('richtig außerhalb 0–2', () => {
     const s = scenario()
     s.stationen[4].werkzeug = { ...frage, richtig: 3 as unknown as 0 }
@@ -84,6 +96,31 @@ describe('validateScenario', () => {
     expect(validateScenario(s)).toEqual([])
     s.stationen[0].tiefer = ['Ein API ist wie eine Tür.', 'Zweiter Satz.']
     expect(validateScenario(s)).toEqual([])
+  })
+  it('Fachwörter auch im Plural', () => {
+    for (const w of ['Tokens', 'Prompts', 'LLMs', 'APIs']) {
+      const s = scenario()
+      s.stationen[0].text = `Wir nutzen ${w} heute`
+      expect(has(s, 'Fachwort')).toBe(true)
+    }
+  })
+  describe('code: Test rot im ersten, grün im zweiten Durchlauf', () => {
+    const code = (erst: boolean, zweit: boolean) => {
+      const s = scenario(true)
+      s.art = 'code'
+      s.stationen[5].daten = { zeilen: ['x'], test: { name: 't', ok: erst } }
+      s.schleife!.zweiterDurchlauf[3].daten = { zeilen: ['y'], test: { name: 't', ok: zweit } }
+      return s
+    }
+    it('rot dann grün ist gültig', () => expect(validateScenario(code(false, true))).toEqual([]))
+    it('zweiter Durchlauf mit rotem Test', () => expect(has(code(false, false), 'test.ok')).toBe(true))
+    it('erster Durchlauf mit grünem Test, obwohl eine Schleife folgt', () => expect(has(code(true, true), 'test.ok')).toBe(true))
+    it('ohne Schleife darf der Test grün sein', () => {
+      const s = scenario()
+      s.art = 'code'
+      s.stationen[5].daten = { zeilen: ['x'], test: { name: 't', ok: true } }
+      expect(validateScenario(s)).toEqual([])
+    })
   })
   describe('handeln daten je art', () => {
     it('fehlende daten im ersten Durchlauf', () => {

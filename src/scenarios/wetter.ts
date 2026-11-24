@@ -5,7 +5,7 @@ export const wetter: Scenario = {
   titel: 'Wetter',
   aufgabe: 'Brauche ich morgen in Graz einen Schirm?',
   art: 'api',
-  stichwoerter: ['wetter', 'regen', 'schirm', 'sonne', 'temperatur', 'morgen', 'kalt', 'warm'],
+  stichwoerter: ['wetter', 'regen', 'schirm', 'sonne', 'temperatur', 'gewitter', 'schnee', 'wolken'],
   stationen: [
     {
       id: 'eingabe',
@@ -23,7 +23,7 @@ export const wetter: Scenario = {
       id: 'denken',
       text: 'Er überlegt: Für das Wetter von morgen frage ich lieber nach.',
       tiefer: [
-        'Das Wetter von morgen kann nur ein Wetterdienst wissen.',
+        'Vorhersagen kommen von Messgeräten und Wolkenbildern, die ein Wetterdienst auswertet.',
         'Er sucht deshalb einen Weg, wie er es herausfinden kann.',
         'Dahinter steckt ein Sprachmodell, das ist ein Computerprogramm, das aus sehr vielen Texten gelernt hat.',
       ],
@@ -32,6 +32,7 @@ export const wetter: Scenario = {
       id: 'planung',
       text: 'Sein Plan: den Wetterdienst fragen und dann die Antwort ansehen.',
       kurz: true,
+      daten: { schritte: ['Wetterdienst fragen', 'Antwort ansehen'] },
     },
     {
       id: 'werkzeug',
@@ -41,7 +42,7 @@ export const wetter: Scenario = {
         'Er sucht sich das Werkzeug aus, das zur Aufgabe passt.',
       ],
       werkzeug: {
-        frage: 'Welches Werkzeug hilft dem Agenten beim Wetter von morgen?',
+        frage: 'Welches Werkzeug sagt dem Agenten, wie es morgen wird?',
         karten: [
           { icon: 'wetter', label: 'Wetterdienst' },
           { icon: 'rechner', label: 'Taschenrechner' },
@@ -61,7 +62,7 @@ export const wetter: Scenario = {
       ],
       daten: {
         anfrage: 'Wetterdienst, wie wird das Wetter morgen in Graz?',
-        antwort: 'Morgen regnet es mit 80 % Wahrscheinlichkeit.',
+        antwort: 'Für Graz sagt der Wetterdienst morgen 80 % Regen voraus.',
       },
     },
     {
@@ -71,8 +72,8 @@ export const wetter: Scenario = {
     },
     {
       id: 'ergebnis',
-      text: 'Und schon hast du deine Antwort: Nimm morgen einen Schirm mit.',
+      text: 'Und schon hast du deine Antwort, sie erscheint wie in einem Chat.',
     },
   ],
-  ergebnis: 'Ja, nimm morgen einen Schirm mit. In Graz regnet es mit 80 % Wahrscheinlichkeit.',
+  ergebnis: 'Ja, nimm morgen einen Schirm mit, denn für Graz sind 80 % Regen angesagt.',
 }
