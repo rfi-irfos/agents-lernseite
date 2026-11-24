@@ -1,0 +1,66 @@
+:root {
+  --u: clamp(4px, 0.9vmin, 8px);
+  --s1: calc(1 * var(--u));
+  --s2: calc(2 * var(--u));
+  --s3: calc(3 * var(--u));
+  --s4: calc(4 * var(--u));
+  --s5: calc(6 * var(--u));
+  --s6: calc(8 * var(--u));
+  --s7: calc(12 * var(--u));
+  --radius: 14px;
+  --orb: #f04d20;
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --theme-fade: 300ms;
+  color-scheme: light;
+}
+
+:root,
+:root[data-theme='light'] {
+  --bg: #f4f6fa;
+  --ink: #1b2433;
+  --muted: #4b5563;
+  --line: #d5dce8;
+  --card: #ffffff;
+  --focus: #0060b8;
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-hi: rgba(0, 96, 184, 0.16);
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #070c19;
+  --ink: #f2f5ff;
+  --muted: #a9b4cc;
+  --line: #1d2b49;
+  --card: #0e1628;
+  --focus: #8fa2ff;
+  --glass: rgba(14, 22, 40, 0.55);
+  --glass-hi: rgba(143, 162, 255, 0.22);
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+html.theme-fade,
+html.theme-fade body,
+html.theme-fade .glass {
+  transition:
+    background-color var(--theme-fade) ease,
+    color var(--theme-fade) ease,
+    border-color var(--theme-fade) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --theme-fade: 150ms;
+  }
+}

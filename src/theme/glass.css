@@ -1,0 +1,23 @@
+.glass {
+  appearance: none;
+  font: inherit;
+  color: var(--ink);
+  padding: var(--s2) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(270deg, var(--glass-hi) 0%, transparent 55%),
+    var(--glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.glass:hover {
+  border-color: var(--focus);
+}
+
+.glass:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

@@ -3,10 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
     <title>So arbeitet ein KI-Agent</title>
+    <script>
+      // Thema vor dem ersten Zeichnen setzen, damit nichts aufblitzt.
+      ;(function () {
+        var t = null
+        try {
+          t = localStorage.getItem('agents.theme')
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.setAttribute('data-theme', t)
+      })()
+    </script>
   </head>
-  <body>
-    <div id="app"></div>
+  <body data-contrast-check>
+    <div id="app">
+      <!-- vorläufiger Platz, Task 9 verschiebt den Schalter in die Steuerleiste -->
+      <button type="button" class="glass" data-action="theme" data-contrast-check></button>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
