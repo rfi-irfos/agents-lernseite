@@ -33,8 +33,8 @@ describe('Format vor dem ersten Zeichnen', () => {
   })
 })
 
-describe('Startphase vor dem ersten Zeichnen', () => {
-  it('#app trägt data-phase="start" schon im HTML, weil start.css erst damit greift (sonst springt das Layout, CLS)', () => {
-    expect(html).toMatch(/<div id="app"[^>]*data-phase="start"/)
+describe('Kein Layout-Sprung beim Laden', () => {
+  it('#app bleibt unsichtbar, bis der Startbildschirm gebaut ist (data-phase fehlt), sonst springt das Layout (CLS)', () => {
+    expect(html).toMatch(/#app:not\(\[data-phase\]\)\s*\{[^}]*visibility:\s*hidden/)
   })
 })

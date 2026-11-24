@@ -8,6 +8,12 @@
     <meta name="theme-color" content="#070c19" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/png" href="/icons/192.png" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <style>
+      /* Bis der Startbildschirm gebaut ist (main.ts setzt data-phase), bleibt alles unsichtbar: kein Nachspringen beim Laden. */
+      #app:not([data-phase]) {
+        visibility: hidden;
+      }
+    </style>
     <title>So arbeitet ein KI-Agent</title>
     <meta name="description" content="Schritt für Schritt erklärt: Wie ein KI-Agent eine Aufgabe versteht, plant, Werkzeuge nutzt und sein Ergebnis prüft." />
     <script>
@@ -25,7 +31,7 @@
     </script>
   </head>
   <body data-contrast-check>
-    <div id="app" data-phase="start">
+    <div id="app">
       <div data-slot="fx"></div>
       <div data-slot="buehne"></div>
       <div data-slot="text" aria-live="polite"></div>
