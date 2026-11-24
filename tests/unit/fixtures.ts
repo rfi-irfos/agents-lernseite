@@ -26,12 +26,12 @@ export function scenario(withLoop = false): Scenario {
     aufgabe: 'Aufgabe',
     art: 'suche',
     stichwoerter: ['x'],
-    stationen: ORDER.map((id) => script(id, id === 'werkzeug' ? { werkzeug: frage } : {})),
+    stationen: ORDER.map((id) => script(id, id === 'werkzeug' ? { werkzeug: frage } : id === 'handeln' ? { daten: { treffer: [] } } : {})),
     schleife: withLoop
       ? {
           grund: 'Nochmal',
           zweiterDurchlauf: (['denken', 'planung', 'werkzeug', 'handeln', 'pruefen'] as StationId[]).map(
-            (id) => script(id),
+            (id) => script(id, id === 'handeln' ? { daten: { treffer: [] } } : {}),
           ),
         }
       : undefined,

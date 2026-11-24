@@ -35,7 +35,7 @@ export const fixtureScenarios: Scenario[] = [
           erklaerung: 'Der Wetterdienst kennt das Wetter, die anderen beiden können das nicht.',
         },
       },
-      { id: 'handeln', text: 'Er führt den Plan aus.' },
+      { id: 'handeln', text: 'Er führt den Plan aus.', daten: { punkte: [{ ort: 'Graz', zeit: '08:00' }] } },
       { id: 'pruefen', text: 'Er prüft das Ergebnis.' },
       { id: 'ergebnis', text: 'Die Antwort ist fertig.' },
     ],
@@ -95,7 +95,7 @@ function handelnAblauf(
           },
         }
       : {}),
-    ergebnis: 'Fertig.',
+    ergebnis: `Antwort ${id}: Das ist das fertige Ergebnis für dich.`,
   }
 }
 

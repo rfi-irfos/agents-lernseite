@@ -86,6 +86,22 @@ describe('validateScenario', () => {
     expect(validateScenario(s)).toEqual([])
   })
   describe('handeln daten je art', () => {
+    it('fehlende daten im ersten Durchlauf', () => {
+      const s = scenario()
+      delete s.stationen[5].daten
+      expect(has(s, 'daten')).toBe(true)
+    })
+    it('fehlende daten im zweiten Durchlauf', () => {
+      const s = scenario(true)
+      delete s.schleife!.zweiterDurchlauf[3].daten
+      expect(has(s, 'zweiter Durchlauf')).toBe(true)
+    })
+    it('Szenario ohne handeln-Station meldet auch fehlende daten nicht doppelt, aber die Reihenfolge', () => {
+      const s = scenario()
+      s.stationen = s.stationen.filter((x) => x.id !== 'handeln')
+      expect(has(s, 'Reihenfolge')).toBe(true)
+      expect(has(s, 'handeln: daten')).toBe(true)
+    })
     const mit = (art: Scenario['art'], daten: Record<string, unknown>) => {
       const s = scenario()
       s.art = art

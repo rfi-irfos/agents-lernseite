@@ -132,7 +132,8 @@ test('Ergebnis: Chatblase sitzt am Platz des Eingabefelds, danach das Auftauchen
   await goTo(page, 7)
   const bubble = page.locator('.chatblase')
   await expect(bubble).toBeVisible()
-  await expect(bubble).toContainText('Hier steht die fertige Antwort für dich.')
+  await expect(bubble).toContainText('Antwort fix-suche: Das ist das fertige Ergebnis für dich.')
+  await expect(bubble).not.toContainText('Hier steht die fertige Antwort für dich.')
   const b = await bubble.evaluate((e) => {
     const r = e.getBoundingClientRect()
     return { x: r.left, y: r.top }
