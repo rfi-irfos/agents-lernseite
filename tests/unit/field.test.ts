@@ -38,4 +38,16 @@ describe('Field', () => {
     const c = { ...canvas(null, null), getContext: () => { throw new Error('x') } } as unknown as HTMLCanvasElement
     expect(new Field(c).mode).toBe('off')
   })
+
+  it('rechnet Strom-Punkte in CSS-Pixeln, auch bei devicePixelRatio 2', () => {
+    vi.stubGlobal('devicePixelRatio', 2)
+    const c = { ...canvas(null, {}), width: 600, height: 300 } as unknown as HTMLCanvasElement
+    const f = new Field(c)
+    void f.stream({ x: 150, y: 75 } as DOMPoint, { x: 150, y: 75 } as DOMPoint, 1000)
+    const pts = (f as unknown as { points(): { x: number; y: number }[] }).points()
+    const last = pts[pts.length - 1]
+    expect(last.x).toBeCloseTo(0, 5) // 150 von 300 CSS-Pixeln = Mitte
+    expect(last.y).toBeCloseTo(0, 5)
+    f.destroy()
+  })
 })
