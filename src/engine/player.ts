@@ -4,7 +4,7 @@ import { readingMs } from './reading-time'
 
 export type PlayerState = 'idle' | 'playing' | 'paused' | 'quiz' | 'transition' | 'done'
 type Ev = 'step' | 'quiz' | 'done' | 'state'
-type Nav = { kind: 'next' } | { kind: 'prev' } | { kind: 'goTo'; i: number }
+type Nav = { kind: 'answer' } | { kind: 'next' } | { kind: 'prev' } | { kind: 'goTo'; i: number }
 
 const SHORT_MAX_MS = 2000
 export const QUIZ_TIMEOUT_MS = 8000
@@ -19,6 +19,7 @@ export class Player {
   private quizMs = 0
   private resumeState: PlayerState = 'playing'
   private queued: Nav | null = null
+  private pauseIntent: boolean | null = null // im Übergang gemerkt
   private listeners: Record<Ev, Set<(p: Player) => void>> = {
     step: new Set(), quiz: new Set(), done: new Set(), state: new Set(),
   }
@@ -43,12 +44,14 @@ export class Player {
   }
 
   play(): void {
+    if (this._state === 'transition') { this.pauseIntent = false; return }
     if (this._state === 'idle') return this.start()
     if (this._state !== 'paused') return
     this.setState(this.resumeState)
   }
 
   pause(): void {
+    if (this._state === 'transition') { this.pauseIntent = true; return }
     if (this._state !== 'playing' && this._state !== 'quiz') return
     this.resumeState = this._state
     this.setState('paused')
@@ -62,10 +65,12 @@ export class Player {
   setAuto(a: boolean): void { this.auto = a }
 
   answerQuiz(i: 0 | 1 | 2): { richtig: boolean; erklaerung?: string } {
-    const w = this._state === 'quiz' ? this.step.script.werkzeug : undefined
+    const inQuiz = this._state === 'quiz' || (this._state === 'transition' && this.resumeState === 'quiz')
+    const w = inQuiz ? this.step.script.werkzeug : undefined
     if (!w) return { richtig: false }
     const richtig = i === w.richtig
-    this.advance()
+    if (this._state === 'transition') this.queued = { kind: 'answer' }
+    else this.advance()
     return richtig ? { richtig } : { richtig, erklaerung: w.erklaerung }
   }
 
@@ -78,6 +83,9 @@ export class Player {
   endTransition(): void {
     if (this._state !== 'transition') return
     this.setState(this.resumeState)
+    const intent = this.pauseIntent
+    this.pauseIntent = null
+    if (intent) this.pause()
     const q = this.queued
     this.queued = null
     if (q) this.run(q)
@@ -110,7 +118,7 @@ export class Player {
   }
 
   private run(n: Nav): void {
-    if (n.kind === 'next') this.advance()
+    if (n.kind === 'next' || n.kind === 'answer') this.advance()
     else if (n.kind === 'prev') this.enter(Math.max(0, this._index - 1))
     else this.enter(Math.min(Math.max(0, n.i), this.steps.length - 1))
   }
@@ -127,7 +135,9 @@ export class Player {
     this.progress = 0
     this.quizMs = 0
     const quiz = !!this.step.script.werkzeug
-    this.setState(quiz ? 'quiz' : 'playing')
+    const target = quiz ? 'quiz' : 'playing'
+    if (this._state === 'paused') this.resumeState = target
+    else this.setState(target)
     this.emit('step')
     if (quiz) this.emit('quiz')
   }
