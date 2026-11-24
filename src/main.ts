@@ -59,13 +59,14 @@ function showHint(player: Player): void {
 
 const all = [...scenarios]
 if (import.meta.env.DEV && isTest() && new URLSearchParams(location.search).get('fixtures') === '1') {
-  all.push(...(await import('../tests/fixtures/scenarios')).fixtureScenarios)
+  const f = await import('../tests/fixtures/scenarios')
+  all.push(...f.fixtureScenarios, ...f.handelnFixtures)
 }
 
 const unmount = mountStart(app, all, ({ scenario, eingabe, beispiel }) => {
   const steps = buildSteps(scenario)
   const player = new Player(steps)
-  player.on('step', (p) => pushEvent({ type: 'step', index: p.index }))
+  player.on('step', (p) => pushEvent({ type: 'step', index: p.index, pass: p.step.pass }))
   const tl = dive({
     slots: { buehne: slot('buehne'), text: slot('text'), eingabe: slot('eingabe') },
     field,

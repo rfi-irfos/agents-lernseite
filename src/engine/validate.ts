@@ -1,3 +1,4 @@
+import { parseHandelnDaten } from './handeln'
 import type { Scenario, StationId, StationScript } from './types'
 
 const ORDER: StationId[] = [
@@ -46,6 +47,13 @@ export function validateScenario(s: Scenario): string[] {
     }
     second.forEach((st) => checkStation(st, `${s.id}/zweiter Durchlauf/${st.id}`, out))
   }
+
+  const handeln = [s.stationen.find((x) => x.id === 'handeln'), ...second.filter((x) => x.id === 'handeln')]
+  handeln.forEach((st, i) => {
+    if (st?.daten !== undefined && !parseHandelnDaten(s.art, st.daten)) {
+      out.push(`${s.id}/handeln${i ? ' (zweiter Durchlauf)' : ''}: daten passen nicht zur Art „${s.art}“.`)
+    }
+  })
 
   const quizzes = [...s.stationen, ...second].filter((x) => x.werkzeug).length
   if (quizzes !== 1) {

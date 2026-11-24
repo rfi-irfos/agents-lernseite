@@ -85,4 +85,36 @@ describe('validateScenario', () => {
     s.stationen[0].tiefer = ['Ein API ist wie eine Tür.', 'Zweiter Satz.']
     expect(validateScenario(s)).toEqual([])
   })
+  describe('handeln daten je art', () => {
+    const mit = (art: Scenario['art'], daten: Record<string, unknown>) => {
+      const s = scenario()
+      s.art = art
+      s.stationen[5].daten = daten
+      return s
+    }
+    it('passende Formen sind gültig', () => {
+      expect(validateScenario(mit('suche', { treffer: [{ titel: 'a', detail: 'b' }] }))).toEqual([])
+      expect(validateScenario(mit('api', { anfrage: 'a', antwort: 'b' }))).toEqual([])
+      expect(validateScenario(mit('code', { zeilen: ['x'], test: { name: 't', ok: true } }))).toEqual([])
+      expect(validateScenario(mit('bild', { src: 'pflanze', markierungen: [{ x: 1, y: 2, label: 'l' }] }))).toEqual([])
+      expect(validateScenario(mit('planung', { punkte: [{ ort: 'Graz', zeit: '8:00' }] }))).toEqual([])
+    })
+    it('falsche Form für die Art', () => {
+      expect(has(mit('suche', { anfrage: 'a', antwort: 'b' }), 'daten passen nicht')).toBe(true)
+      expect(has(mit('code', { zeilen: ['x'], test: { name: 't' } }), 'daten passen nicht')).toBe(true)
+      expect(has(mit('planung', { punkte: [{ ort: 1, zeit: 'x' }] }), 'daten passen nicht')).toBe(true)
+    })
+    it('bild: keine Adresse im Netz', () => {
+      for (const src of ['https://example.com/a.png', '//cdn/x.svg', 'a/b.svg']) {
+        expect(has(mit('bild', { src, markierungen: [] }), 'daten passen nicht')).toBe(true)
+      }
+    })
+    it('zweiter Durchlauf wird mitgeprüft', () => {
+      const s = scenario(true)
+      s.art = 'api'
+      s.stationen[5].daten = { anfrage: 'a', antwort: 'b' }
+      s.schleife!.zweiterDurchlauf[3].daten = { treffer: [] }
+      expect(has(s, 'zweiter Durchlauf')).toBe(true)
+    })
+  })
 })

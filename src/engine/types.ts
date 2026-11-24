@@ -5,6 +5,23 @@ export type Art = 'suche' | 'api' | 'code' | 'bild' | 'planung'
 export type Format = 'hoch' | 'quadrat' | 'quer'
 export type Tempo = 0.75 | 1 | 1.5
 
+export type SucheDaten = { treffer: { titel: string; detail: string }[] }
+export type ApiDaten = { anfrage: string; antwort: string }
+export type CodeDaten = { zeilen: string[]; test: { name: string; ok: boolean } }
+/** `src` ist ein Name aus src/svg (ohne .svg), nie eine Adresse im Netz. Markierungen in Prozent der Bildfläche. */
+export type BildDaten = { src: string; markierungen: { x: number; y: number; label: string }[] }
+export type PlanungsDaten = { punkte: { ort: string; zeit: string }[] }
+
+/** `daten` der Station `handeln`, je nach `art` des Ablaufs. */
+export type HandelnDatenMap = {
+  suche: SucheDaten
+  api: ApiDaten
+  code: CodeDaten
+  bild: BildDaten
+  planung: PlanungsDaten
+}
+export type HandelnDaten = HandelnDatenMap[Art]
+
 export interface Karte { icon: string; label: string }
 
 export interface Werkzeugwahl {
