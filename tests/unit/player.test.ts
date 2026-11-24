@@ -247,4 +247,37 @@ describe('Player', () => {
     expect(none).not.toHaveBeenCalled()
     expect(off.state).toBe('quiz')
   })
+  describe('Prüfen mit Schleife: Lesezeit zählt den Grund mit', () => {
+    const grund = 'Das Ergebnis passt noch nicht ganz zur Aufgabe, also denkt der Agent noch einmal nach.'
+    const loop = () => {
+      const sc = scenario(true)
+      sc.schleife!.grund = grund
+      return buildSteps(sc)
+    }
+    const toPruefen = (p: Player, pass: 1 | 2) => {
+      p.start()
+      while (!(p.step.station === 'pruefen' && p.step.pass === pass)) {
+        if (p.state === 'quiz') p.answerQuiz(1)
+        else p.tick(readingMs(p.step.script.text + ' ' + (p.step.extraText ?? '')))
+      }
+    }
+    it('erster Durchlauf: Station plus Grund', () => {
+      const p = new Player(loop())
+      toPruefen(p, 1)
+      const i = p.index
+      const need = readingMs(`${p.step.script.text} ${grund}`)
+      expect(need).toBeGreaterThan(readingMs(p.step.script.text))
+      p.tick(need - 1)
+      expect(p.index).toBe(i)
+      p.tick(1)
+      expect(p.index).toBe(i + 1)
+    })
+    it('zweiter Durchlauf: nur der Stationstext', () => {
+      const p = new Player(loop())
+      toPruefen(p, 2)
+      const i = p.index
+      p.tick(readingMs(p.step.script.text))
+      expect(p.index).toBe(i + 1)
+    })
+  })
 })

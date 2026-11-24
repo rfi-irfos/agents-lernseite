@@ -41,6 +41,42 @@ export const fixtureScenarios: Scenario[] = [
     ],
     ergebnis: 'Fertig.',
   },
+  {
+    // Viele Sätze unter „Tiefer graben“: die Detail-Ebene muss intern scrollen, die Seite nie.
+    id: 'fix-tiefer',
+    titel: 'Teststation mit langem Tiefer graben',
+    aufgabe: 'zztief Aufgabe',
+    art: 'suche',
+    stichwoerter: ['zztief'],
+    stationen: [
+      { id: 'eingabe', text: 'Du gibst dem Agenten eine Aufgabe.' },
+      {
+        id: 'wahrnehmung',
+        text: 'Er liest den Satz Wort für Wort.',
+        tiefer: Array.from({ length: 30 }, (_, i) => `Satz ${i + 1}: Der Agent zerlegt deine Aufgabe in kleine Teile, so wie du beim Lesen.`),
+      },
+      { id: 'denken', text: 'Er überlegt, welcher Weg am besten passt.' },
+      { id: 'planung', text: 'Sein Plan hat wenige Schritte.', kurz: true },
+      {
+        id: 'werkzeug',
+        text: 'Dafür greift er zum richtigen Werkzeug.',
+        werkzeug: {
+          frage: 'Welches Werkzeug passt?',
+          karten: [
+            { icon: 'rechner', label: 'Taschenrechner' },
+            { icon: 'wetter', label: 'Wetterdienst' },
+            { icon: 'album', label: 'Fotoalbum' },
+          ],
+          richtig: 1,
+          erklaerung: 'Der Wetterdienst kennt das Wetter.',
+        },
+      },
+      { id: 'handeln', text: 'Er führt den Plan aus.', daten: { treffer: [{ titel: 'A', detail: 'B' }] } },
+      { id: 'pruefen', text: 'Er prüft das Ergebnis.' },
+      { id: 'ergebnis', text: 'Die Antwort ist fertig.' },
+    ],
+    ergebnis: 'Fertig.',
+  },
 ]
 
 const wahl = (richtig: 0 | 1 | 2) => ({

@@ -23,4 +23,10 @@ describe('buildSteps', () => {
     const s = buildSteps(scenario(true))
     expect(s.filter((x) => x.script.werkzeug)).toHaveLength(1)
   })
+  it('pruefen im ersten Durchlauf trägt den Schleifengrund als extraText', () => {
+    const s = buildSteps(scenario(true))
+    expect(s.filter((x) => x.extraText)).toHaveLength(1)
+    expect(s.find((x) => x.extraText)).toMatchObject({ station: 'pruefen', pass: 1, extraText: 'Nochmal' })
+    expect(buildSteps(scenario()).some((x) => x.extraText)).toBe(false)
+  })
 })
