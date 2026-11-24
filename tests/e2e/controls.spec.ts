@@ -149,13 +149,15 @@ test('Tiefer graben: Bühne ≤ 0,7 und sichtbar, Player pausiert, Esc schließt
   await begin(page, 'zztief')
   await goTo(page, 1)
   await expect.poll(() => state(page)).toBe('playing')
+  const opacity = () => page.locator('[data-slot=buehne]').evaluate((e) => getComputedStyle(e).opacity)
+  const opacityBefore = await opacity()
   await page.locator('[data-action=tiefer]').click()
   await expect(page.locator('.detail')).toBeVisible()
   await expect.poll(() => state(page)).toBe('paused')
   expect(await matrixScale(page)).toBeLessThanOrEqual(0.7)
   const r = await page.locator('[data-slot=buehne]').boundingBox()
   expect(r!.width).toBeGreaterThan(20)
-  expect(await page.locator('[data-slot=buehne]').evaluate((e) => getComputedStyle(e).opacity)).toBe('1')
+  expect(await opacity()).toBe(opacityBefore) // die Bühne blendet bei normaler Bewegung nicht aus
   // Die Detail-Ebene scrollt innen, die Seite nie.
   const m = await page.evaluate(() => {
     const d = document.querySelector('.detail') as HTMLElement
@@ -309,7 +311,9 @@ test('320x568: alle Steuerknöpfe passen ins Bild und überlappen sich nicht', a
   await begin(page, 'zztief')
   await goTo(page, 1)
   const m = await page.evaluate(() => {
-    const els = [...document.querySelectorAll<HTMLElement>('.controls button, .progress button')].filter((e) => e.getBoundingClientRect().width > 0)
+    const els = [...document.querySelectorAll<HTMLElement>('.controls button, .progress button')].filter(
+      (e) => e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility === 'visible',
+    )
     const rs = els.map((e) => e.getBoundingClientRect())
     let overlap = 0
     for (let i = 0; i < rs.length; i++)
@@ -317,9 +321,12 @@ test('320x568: alle Steuerknöpfe passen ins Bild und überlappen sich nicht', a
         const a = rs[i], b = rs[j]
         if (a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5) overlap++
       }
-    return { n: rs.length, overlap, out: rs.filter((r) => r.left < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5).length }
+    const row = document.querySelector('.controls')!.getBoundingClientRect().height
+    const btn = document.querySelector('[data-action=pause]')!.getBoundingClientRect().height
+    return { row, btn, n: rs.length, overlap, out: rs.filter((r) => r.left < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5).length }
   })
   expect(m.n).toBeGreaterThan(8)
   expect(m.overlap).toBe(0)
   expect(m.out).toBe(0)
+  expect(m.row).toBeLessThanOrEqual(m.btn * 1.2) // eine Zeile, kein Umbruch
 })
