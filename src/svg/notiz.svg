@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" role="img" aria-hidden="true" focusable="false">
+  <path class="g-base" d="M8 6h36l14 14v54a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
+  <path class="g-acc" d="M44 6v14h14z"/>
+  <rect class="g-acc" x="14" y="34" width="36" height="4" rx="2"/>
+  <rect class="g-acc" x="14" y="46" width="30" height="4" rx="2"/>
+  <rect class="g-acc" x="14" y="58" width="24" height="4" rx="2"/>
+</svg>

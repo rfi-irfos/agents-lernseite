@@ -4,6 +4,8 @@ export type AppEvent = { type: string; [k: string]: unknown }
 declare global {
   interface Window {
     __events?: AppEvent[]
+    /** Nur im Testmodus: der laufende Player. */
+    __player?: import('./engine/player').Player
   }
 }
 

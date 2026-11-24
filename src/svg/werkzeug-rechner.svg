@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true" focusable="false">
+  <rect class="g-base" x="24" y="10" width="48" height="76" rx="8"/>
+  <rect class="g-acc-fill" x="31" y="18" width="34" height="14" rx="3"/>
+  <circle class="g-acc-fill" cx="38" cy="48" r="4"/><circle class="g-acc-fill" cx="48" cy="48" r="4"/><circle class="g-acc-fill" cx="58" cy="48" r="4"/>
+  <circle class="g-acc-fill" cx="38" cy="62" r="4"/><circle class="g-acc-fill" cx="48" cy="62" r="4"/><circle class="g-acc-fill" cx="58" cy="62" r="4"/>
+  <circle class="g-acc-fill" cx="38" cy="75" r="4"/><circle class="g-acc-fill" cx="48" cy="75" r="4"/><circle class="g-acc-fill" cx="58" cy="75" r="4"/>
+</svg>

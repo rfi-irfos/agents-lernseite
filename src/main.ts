@@ -2,6 +2,7 @@ import './theme/tokens.css'
 import './theme/layout.css'
 import './theme/glass.css'
 import './theme/start.css'
+import './scenes/scenes.css'
 import { de } from './content/de'
 import { applyTheme, initialTheme, toggleTheme } from './theme/theme'
 import { watchFormat } from './engine/format'
@@ -13,6 +14,7 @@ import { Player } from './engine/player'
 import { Sound } from './engine/sound'
 import { Field } from './fx/field'
 import { dive } from './scenes/dive'
+import { runScenes } from './scenes/run'
 import { gsap } from 'gsap'
 import { dur, isTest, pushEvent, reducedMotion } from './env'
 import type { Format } from './engine/types'
@@ -55,7 +57,12 @@ function showHint(player: Player): void {
   })
 }
 
-const unmount = mountStart(app, scenarios, ({ scenario, eingabe, beispiel }) => {
+const all = [...scenarios]
+if (import.meta.env.DEV && isTest() && new URLSearchParams(location.search).get('fixtures') === '1') {
+  all.push(...(await import('../tests/fixtures/scenarios')).fixtureScenarios)
+}
+
+const unmount = mountStart(app, all, ({ scenario, eingabe, beispiel }) => {
   const steps = buildSteps(scenario)
   const player = new Player(steps)
   player.on('step', (p) => pushEvent({ type: 'step', index: p.index }))
@@ -71,7 +78,10 @@ const unmount = mountStart(app, scenarios, ({ scenario, eingabe, beispiel }) => 
   })
   tl.eventCallback('onComplete', () => {
     unmount()
+    void field.surface(800) // Eintauchen vorbei: die Partikel werden wieder ruhig
     if (beispiel) showHint(player)
+    runScenes({ app, player, field, scenario, eingabe, sound })
+    if (isTest()) window.__player = player
     player.start()
   })
 })

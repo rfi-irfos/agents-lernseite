@@ -19,4 +19,14 @@ export const de = {
       { id: 'ausflug', titel: 'Ausflug planen', aufgabe: 'Plan einen Schulausflug nach Wien für 25 Kinder.' },
     ],
   },
+  stationen: {
+    mitmach: 'Was würdest du nehmen?',
+    agentWaehlt: 'Der Agent wählt selbst.',
+    erinnerung: 'Erinnerung aus der Schublade',
+    schublade: 'Schublade mit alten Notizen',
+    gedankenwolke: 'Gedankenwolke mit drei möglichen Wegen',
+    plan: 'Plan in Schritten',
+    schritt: 'Schritt',
+    ersteWahl: 'Der Agent greift zu diesem Werkzeug.',
+  },
 } as const

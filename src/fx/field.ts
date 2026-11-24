@@ -197,8 +197,10 @@ export class Field {
       const k = Math.min(1, s.t / s.ms)
       for (let i = 0; i < 8; i++) {
         const f = Math.max(0, k - i * 0.03)
-        const w = this.c.width || 1
-        const h = this.c.height || 1
+        // Eingabepunkte sind CSS-Pixel, die Leinwand rechnet in Gerätepixeln
+        const d = Math.min(typeof devicePixelRatio === 'number' ? devicePixelRatio : 1, 2)
+        const w = (this.c.width || 1) / d
+        const h = (this.c.height || 1) / d
         out.push({
           x: ((s.a.x + (s.b.x - s.a.x) * f) / w) * 2 - 1,
           y: 1 - ((s.a.y + (s.b.y - s.a.y) * f) / h) * 2,

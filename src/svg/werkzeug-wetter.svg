@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true" focusable="false">
+  <path class="g-base" d="M28 66a16 16 0 0 1 1-32 22 22 0 0 1 42 6 13 13 0 0 1-2 26z"/>
+  <path class="g-acc" d="M34 74l-4 10M50 74l-4 10M66 74l-4 10" stroke-linecap="round"/>
+  <circle class="g-acc-fill" cx="72" cy="24" r="8"/>
+</svg>
