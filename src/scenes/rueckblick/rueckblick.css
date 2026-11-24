@@ -50,8 +50,17 @@
 .rb-satz {
   font-weight: 600;
 }
+.rb-besser .rb-satz {
+  flex: none;
+  text-align: center;
+  font-size: clamp(13px, 1.9vmin, 18px);
+  line-height: 1.3;
+}
 .rb-merke {
   font-size: 0.95em;
+}
+.rb-opts .rb-weiter {
+  align-self: auto;
 }
 .rb-weiter {
   align-self: flex-end;
@@ -206,6 +215,7 @@
   justify-content: center;
   gap: var(--s2);
 }
+.rb-opts .rb-weiter,
 .rb-opt {
   display: inline-flex;
   align-items: center;

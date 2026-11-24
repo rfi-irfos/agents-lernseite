@@ -55,6 +55,7 @@ export function besser(c: PartCtx): PartHandle {
   draw()
 
   const satz = el('p', 'rb-satz')
+  satz.setAttribute('role', 'status')
   satz.textContent = t.verlaeufe.besser.satz
   const group = el('div', 'rb-opts')
   group.setAttribute('role', 'group')
@@ -69,21 +70,21 @@ export function besser(c: PartCtx): PartHandle {
     buttons.set(k, b)
     group.append(b)
   }
-  wrap.append(svgEl, group)
+  wrap.append(svgEl, satz, group)
   c.stage.append(wrap)
 
   const merke = el('p', 'rb-merke')
   const strong = el('strong')
   strong.textContent = t.merke
   merke.append(strong, ` ${t.merksatz}`)
-  c.text.append(satz, merke)
+  c.text.append(merke)
   if (c.weiter) {
     const w = el('button', 'glass rb-weiter')
     w.type = 'button'
     w.dataset.action = 'rb-weiter'
     w.textContent = de.rueckblick.weiter
     w.addEventListener('click', () => c.weiter?.())
-    c.text.append(w)
+    group.append(w)
   }
 
   let tween: gsap.core.Tween | undefined
