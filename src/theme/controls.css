@@ -202,3 +202,13 @@
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
+
+/* Reduzierte Bewegung: nur Überblendungen, höchstens 200 ms */
+@media (prefers-reduced-motion: reduce) {
+  .ctl,
+  .controls-main,
+  .controls-done,
+  .progress-dot .dot {
+    transition-duration: 150ms;
+  }
+}

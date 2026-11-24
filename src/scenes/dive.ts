@@ -26,6 +26,12 @@ export const dive: SceneBuilder = (ctx) => {
     app.dataset.phase = 'play'
   }
 
+  /** Am Ende immer sichtbar und ohne Reste: auch wenn alle Dauern 0 sind (Testmodus), wo Setzen und Einblenden am selben Punkt liegen. */
+  const settle = () => {
+    gsap.set([buehne, text], { clearProps: 'opacity' })
+    gsap.set(buehne, { clearProps: 'transform,transformOrigin' })
+  }
+
   if (ctx.reduced) {
     const f = dur(0.1)
     tl.to(startParts, { opacity: 0, duration: f })
@@ -33,6 +39,7 @@ export const dive: SceneBuilder = (ctx) => {
     tl.call(toPlay)
     tl.set([buehne, text], { opacity: 0 })
     tl.to([buehne, text], { opacity: 1, duration: f, clearProps: 'opacity' })
+    tl.call(settle)
     return tl
   }
 
@@ -91,5 +98,6 @@ export const dive: SceneBuilder = (ctx) => {
   tl.to(orb, { opacity: 1, duration: dur(0.15) }, dur(B + 0.65))
   tl.to(orb, { left: '50%', top: '45%', duration: dur(0.6) }, dur(B + 0.65))
   tl.to(orb, { opacity: 0, duration: dur(0.2), onComplete: () => orb.remove() }, dur(B + 1.25))
+  tl.call(settle)
   return tl
 }
