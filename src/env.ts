@@ -40,12 +40,21 @@ export function pushEvent(e: AppEvent): void {
   ;(window.__events ??= []).push(e)
 }
 
-/** Nur im Testmodus: meldet jedes erzeugte Audio-Objekt als Ereignis `audio` (src), damit Tests „kein Ton ohne Schalter“ prüfen können. */
+/**
+ * Nur im Testmodus: `audio-new` je erzeugtem Audio-Objekt (src), `audio` je hörbarer Wiedergabe (nicht stumm,
+ * Lautstärke > 0). So prüfen Tests „kein Objekt ohne Schalter“ und „welcher Effekt klingt“.
+ */
 export function spyAudio(): void {
   if (!isTest() || typeof window === 'undefined' || typeof window.Audio !== 'function') return
   const Native = window.Audio
   window.Audio = function (this: unknown, src?: string) {
-    pushEvent({ type: 'audio', src: String(src ?? '') })
-    return new Native(src)
+    pushEvent({ type: 'audio-new', src: String(src ?? '') })
+    const a = new Native(src)
+    const play = a.play.bind(a)
+    a.play = () => {
+      if (!a.muted && a.volume > 0) pushEvent({ type: 'audio', src: String(src ?? '') })
+      return play()
+    }
+    return a
   } as unknown as typeof Audio
 }

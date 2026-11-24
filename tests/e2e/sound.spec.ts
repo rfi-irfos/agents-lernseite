@@ -19,6 +19,10 @@ const audio = (page: Page) =>
       .map((e) => String(e.src).replace(/^.*\/(\w+)\.ogg.*$/, '$1')),
   )
 
+/** Anzahl erzeugter Audio-Objekte (nicht Wiedergaben). */
+const created = (page: Page) =>
+  page.evaluate(() => ((window as unknown as TW).__events ?? []).filter((e) => e.type === 'audio-new').length)
+
 test('ohne Klick auf den Ton-Schalter entsteht kein Audio-Objekt', async ({ page }) => {
   await begin(page, 'zztief')
   await page.locator('[data-action=tiefer]').click()
@@ -26,6 +30,7 @@ test('ohne Klick auf den Ton-Schalter entsteht kein Audio-Objekt', async ({ page
   await page.keyboard.press('Escape')
   await expect(page.locator('.detail')).toHaveCount(0)
   expect(await audio(page)).toEqual([])
+  expect(await created(page)).toBe(0)
   await expect(page.locator('[data-action=sound]')).toHaveAttribute('aria-pressed', 'false')
 })
 
@@ -33,7 +38,8 @@ test('eingeschaltet spielt das Eintauchen und das Auftauchen, der Zustand überl
   await begin(page, 'zztief')
   await page.locator('[data-action=sound]').click()
   await expect(page.locator('[data-action=sound]')).toHaveAttribute('aria-pressed', 'true')
-  expect(await audio(page)).toEqual([]) // Einschalten selbst bleibt still
+  await expect.poll(() => audio(page)).toEqual(['klick']) // Einschalten ist hörbar, der Pool (sechs Elemente) bleibt stumm
+  expect(await created(page)).toBe(6)
   await page.locator('[data-action=tiefer]').click()
   await expect(page.locator('.detail')).toBeVisible()
   await expect.poll(() => audio(page)).toContain('eintauchen')
@@ -73,9 +79,9 @@ const count = async (page: Page, n: string) => (await audio(page)).filter((x) =>
 test('Ton an: klick bei Knopf, genau ein wisch je Stationswechsel, erste Station still', async ({ page }) => {
   await begin(page, 'zztief', null)
   await page.locator('[data-action=sound]').click()
-  expect(await audio(page)).toEqual([])
+  await expect.poll(() => count(page, 'klick')).toBe(1) // der Einschalt-Klick selbst
   await page.locator('[data-action=tempo]').click()
-  await expect.poll(() => count(page, 'klick')).toBe(1)
+  await expect.poll(() => count(page, 'klick')).toBe(2)
   expect(await count(page, 'wisch')).toBe(0) // Station 0: kein wisch
   await go(page, 1)
   await expect.poll(() => count(page, 'wisch')).toBe(1)

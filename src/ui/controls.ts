@@ -136,7 +136,9 @@ export function mountControls(slot: HTMLElement, p: Player, s: Sound, h: Control
   on(tempo, () => p.setTempo(TEMPI[(TEMPI.indexOf(p.tempo) + 1) % TEMPI.length]))
   on(tiefer, () => h.onDetail?.())
   on(sound, () => {
-    safeStore.set('sound', s.toggle() ? 'on' : 'off')
+    const nowOn = s.toggle()
+    safeStore.set('sound', nowOn ? 'on' : 'off')
+    if (nowOn) s.play('klick') // Rückmeldung: das Einschalten selbst ist hörbar
   })
   on(nochmal, () => h.onRestart?.())
   on(naechster, () => h.onNext?.())
