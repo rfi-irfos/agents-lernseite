@@ -150,14 +150,14 @@ test('Tiefer graben: Bühne ≤ 0,7 und sichtbar, Player pausiert, Esc schließt
   await goTo(page, 1)
   await expect.poll(() => state(page)).toBe('playing')
   const opacity = () => page.locator('[data-slot=buehne]').evaluate((e) => getComputedStyle(e).opacity)
-  const opacityBefore = await opacity()
+  expect(await opacity()).toBe('1')
   await page.locator('[data-action=tiefer]').click()
   await expect(page.locator('.detail')).toBeVisible()
   await expect.poll(() => state(page)).toBe('paused')
   expect(await matrixScale(page)).toBeLessThanOrEqual(0.7)
   const r = await page.locator('[data-slot=buehne]').boundingBox()
   expect(r!.width).toBeGreaterThan(20)
-  expect(await opacity()).toBe(opacityBefore) // die Bühne blendet bei normaler Bewegung nicht aus
+  expect(await opacity()).toBe('1') // die Bühne blendet bei normaler Bewegung nicht aus
   // Die Detail-Ebene scrollt innen, die Seite nie.
   const m = await page.evaluate(() => {
     const d = document.querySelector('.detail') as HTMLElement
@@ -219,6 +219,32 @@ test('Tiefer graben bei reduzierter Bewegung: überblenden, nicht skalieren', as
   await expect(page.locator('.detail')).toBeVisible()
   expect(await matrixScale(page)).toBe(1)
   expect(await page.locator('[data-slot=buehne]').boundingBox()).not.toBeNull()
+  // überblendet: die Bühne bleibt sichtbar, aber gedimmt
+  const o = parseFloat(await page.locator('[data-slot=buehne]').evaluate((e) => getComputedStyle(e).opacity))
+  expect(o).toBeGreaterThan(0.3)
+  expect(o).toBeLessThan(1)
+})
+
+test('nach dem Eintauchen im Testmodus sind Bühne und Text sichtbar (Deckkraft 1)', async ({ page }) => {
+  await begin(page, 'zzsuche')
+  for (const n of ['buehne', 'text']) {
+    expect(await page.locator(`[data-slot=${n}]`).evaluate((e) => getComputedStyle(e).opacity), n).toBe('1')
+  }
+})
+
+test('reduzierte Bewegung: Übergänge der Steuerung dauern höchstens 0,2 s', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await begin(page, 'zztief')
+  const max = await page.evaluate(() => {
+    const els = ['.ctl', '.controls-main', '.controls-done', '.progress-dot .dot'].flatMap((q) => [...document.querySelectorAll(q)])
+    const all = els.flatMap((e) => {
+      const cs = getComputedStyle(e)
+      return [...cs.transitionDuration.split(','), ...cs.animationDuration.split(',')].map((v) => parseFloat(v) * (v.trim().endsWith('ms') ? 0.001 : 1))
+    })
+    return { n: els.length, max: Math.max(...all) }
+  })
+  expect(max.n).toBeGreaterThan(10)
+  expect(max.max).toBeLessThanOrEqual(0.2)
 })
 
 test('Tiefer graben ist ohne Zusatztext deaktiviert', async ({ page }) => {
