@@ -137,10 +137,6 @@
     background-color 300ms ease,
     box-shadow 300ms ease;
 }
-.progress-dot[data-kurz='true'] .dot {
-  width: var(--s1);
-  height: var(--s1);
-}
 .progress-dot[data-state='done'] .dot {
   background: var(--dc);
 }

@@ -132,12 +132,12 @@ test('Ton-Knopf schaltet um und merkt sich die Wahl', async ({ page }) => {
   await expect(page.locator('[data-action=sound]')).toHaveAttribute('aria-pressed', 'true')
 })
 
-test('Fortschrittsleiste: ein Punkt pro Schritt, kurze Schritte kleiner, Klick springt', async ({ page }) => {
+test('Fortschrittsleiste: ein Punkt pro Schritt, alle gleich groß, Klick springt', async ({ page }) => {
   await begin(page, 'zzschleife')
   await expect(page.locator('.progress [data-dot]')).toHaveCount(13)
   const w = (i: number) =>
     page.locator(`.progress [data-dot="${i}"] .dot`).evaluate((e) => e.getBoundingClientRect().width)
-  expect(await w(3)).toBeLessThan(await w(2)) // planung ist kurz
+  expect(await w(3)).toBe(await w(2)) // planung ist kurz, der Punkt trotzdem voll groß
   await page.locator('.progress [data-dot="6"]').click()
   await expect.poll(() => index(page)).toBe(6)
   await expect(page.locator('.progress [data-dot="6"]')).toHaveAttribute('aria-current', 'step')

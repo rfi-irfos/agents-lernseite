@@ -17,7 +17,6 @@ export function mountProgress(slot: HTMLElement, steps: Step[], p: Player): () =
     b.type = 'button'
     b.className = 'progress-dot'
     b.dataset.dot = String(i)
-    if (st.script.kurz) b.dataset.kurz = 'true'
     b.style.setProperty('--dc', `var(--c-${st.station})`)
     b.setAttribute('aria-label', `${de.fortschritt.schritt} ${i + 1} ${de.fortschritt.von} ${steps.length}: ${de.stationNamen[st.station]}`)
     const dot = document.createElement('span')
