@@ -3,6 +3,36 @@ export const de = {
   theme: {
     toggle: 'Thema wechseln',
   },
+  steuerung: {
+    label: 'Steuerung',
+    pause: 'Pause',
+    weiter: 'Weiter',
+    zurueck: 'Zurück',
+    vor: 'Vor',
+    tempo: 'Tempo',
+    ton: 'Ton',
+    tiefer: 'Tiefer graben',
+    nochmal: 'Nochmal',
+    naechster: 'Nächster Ablauf',
+  },
+  fortschritt: {
+    label: 'Fortschritt',
+    schritt: 'Schritt',
+    von: 'von',
+  },
+  detail: {
+    schliessen: 'Schließen',
+  },
+  stationNamen: {
+    eingabe: 'Eingabe',
+    wahrnehmung: 'Wahrnehmen',
+    denken: 'Denken',
+    planung: 'Planen',
+    werkzeug: 'Werkzeug',
+    handeln: 'Handeln',
+    pruefen: 'Prüfen',
+    ergebnis: 'Ergebnis',
+  },
   start: {
     heading: 'Deine Aufgabe',
     inputLabel: 'Deine Aufgabe',

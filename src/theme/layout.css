@@ -53,14 +53,6 @@
   grid-area: steuerung;
 }
 
-/* vorläufiger Platz des Themenschalters, Task 9 verschiebt ihn in die Steuerleiste */
-#app > [data-action='theme'] {
-  position: absolute;
-  top: var(--s2);
-  right: var(--s2);
-  z-index: 3;
-}
-
 #app[data-format='hoch'] {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 5fr) minmax(0, 3fr) auto auto;

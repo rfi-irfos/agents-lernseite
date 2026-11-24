@@ -14,7 +14,7 @@ export class Player {
   private _state: PlayerState = 'idle'
   private _index = 0
   private auto: boolean
-  private tempo: Tempo
+  private _tempo: Tempo
   private progress = 0 // Anteil der Haltezeit, 0..1
   private quizMs = 0
   private quizFired = false
@@ -27,12 +27,15 @@ export class Player {
 
   constructor(private readonly steps: Step[], opts: { auto?: boolean; tempo?: Tempo } = {}) {
     this.auto = opts.auto ?? true
-    this.tempo = opts.tempo ?? 1
+    this._tempo = opts.tempo ?? 1
   }
 
   get state(): PlayerState { return this._state }
   get index(): number { return this._index }
   get step(): Step { return this.steps[this._index] }
+  get tempo(): Tempo { return this._tempo }
+  /** Pause gilt, auch wenn sie im Übergang erst gemerkt ist. */
+  get paused(): boolean { return this._state === 'paused' || (this._state === 'transition' && this.pauseIntent === true) }
 
   on(ev: Ev, cb: (p: Player) => void): () => void {
     this.listeners[ev].add(cb)
@@ -62,7 +65,7 @@ export class Player {
   prev(): void { this.nav({ kind: 'prev' }) }
   goTo(i: number): void { this.nav({ kind: 'goTo', i }) }
 
-  setTempo(t: Tempo): void { this.tempo = t } // progress ist ein Anteil, wirkt also anteilig
+  setTempo(t: Tempo): void { this._tempo = t } // progress ist ein Anteil, wirkt also anteilig
   setAuto(a: boolean): void { this.auto = a }
 
   answerQuiz(i: 0 | 1 | 2): { richtig: boolean; erklaerung?: string } {
@@ -113,7 +116,8 @@ export class Player {
   }
 
   private holdMs(): number {
-    const ms = readingMs(this.step.script.text, this.tempo)
+    const st = this.step
+    const ms = readingMs(st.extraText ? `${st.script.text} ${st.extraText}` : st.script.text, this._tempo)
     return this.step.script.kurz ? Math.min(ms, SHORT_MAX_MS) : ms
   }
 

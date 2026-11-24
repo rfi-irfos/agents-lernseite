@@ -29,10 +29,11 @@ export const ergebnis: SceneBuilder = (ctx) => {
   antwort.textContent = ctx.scenario.ergebnis
   blase.append(name, antwort)
   slot.append(blase)
-  // Ragt die Blase unten aus dem Bild (kleines Telefon), rückt sie nur so weit hoch, wie nötig.
+  // Ragt die Blase unten aus dem Bild oder in die Steuerung (kleines Telefon), rückt sie nur so weit hoch, wie nötig.
   const app = slot.closest('#app') as HTMLElement | null
   if (app) {
-    const limit = app.getBoundingClientRect().bottom - 4
+    const steuerung = app.querySelector('[data-slot=steuerung]')
+    const limit = Math.min(app.getBoundingClientRect().bottom, steuerung ? steuerung.getBoundingClientRect().top : Infinity) - 4
     const over = blase.getBoundingClientRect().bottom - limit
     if (over > 0) blase.style.top = `-${Math.ceil(over)}px`
   }

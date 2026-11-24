@@ -23,11 +23,12 @@
     <div id="app">
       <div data-slot="fx"></div>
       <div data-slot="buehne"></div>
-      <div data-slot="text"></div>
+      <div data-slot="text" aria-live="polite"></div>
       <div data-slot="eingabe"></div>
-      <div data-slot="steuerung"></div>
-      <!-- vorläufiger Platz, Task 9 verschiebt den Schalter in die Steuerleiste -->
-      <button type="button" class="glass" data-action="theme" data-contrast-check></button>
+      <div data-slot="steuerung">
+        <!-- Der Themenschalter steht schon auf dem Startbildschirm; im Ablauf zieht er in die Steuerleiste um. -->
+        <button type="button" class="glass ctl" data-action="theme" data-contrast-check></button>
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

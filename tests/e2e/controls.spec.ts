@@ -98,6 +98,7 @@ test('jeder Knopf ist per Tab erreichbar und hat einen sichtbaren Fokusrahmen', 
       const cs = getComputedStyle(e)
       return { key: e.dataset.action ?? (e.dataset.dot ? 'dot' : e.tagName), style: cs.outlineStyle, width: parseFloat(cs.outlineWidth) }
     })
+    if (r.key === 'BODY') continue // der Fokus hat die Seite einmal umrundet
     seen.add(r.key)
     expect(r.style, r.key).not.toBe('none')
     expect(r.width, r.key).toBeGreaterThanOrEqual(2)
@@ -265,7 +266,7 @@ test('Nächster Ablauf führt zurück zum Startbildschirm, ein neuer Ablauf star
   await expect(page.locator('.chatblase')).toHaveCount(0)
   await page.getByRole('textbox').fill('zzapi')
   await page.getByRole('button', { name: 'Ablauf starten' }).click()
-  await page.waitForFunction(() => (window as unknown as TW).__player!.state !== 'done')
+  await page.waitForFunction(() => !!(window as unknown as TW).__player && (window as unknown as TW).__player!.state !== 'done')
   await settled(page)
   await expect(page.locator('[data-slot=text] .erzaehl')).toHaveCount(1)
   await expect(page.locator('.controls')).toHaveCount(1)

@@ -5,6 +5,8 @@ export interface Step {
   script: StationScript
   pass: 1 | 2
   loopStart?: boolean
+  /** Zusätzlicher Lesetext der Station (bei Prüfen im ersten Durchlauf: der Schleifengrund). */
+  extraText?: string
 }
 
 /** Flache Schrittliste. Der zweite Durchlauf sitzt vor `ergebnis`. */
@@ -19,7 +21,9 @@ export function buildSteps(s: Scenario): Step[] {
         steps.push(step)
       })
     }
-    steps.push({ station: script.id, script, pass: 1 })
+    const step: Step = { station: script.id, script, pass: 1 }
+    if (s.schleife && script.id === 'pruefen') step.extraText = s.schleife.grund
+    steps.push(step)
   })
   return steps
 }

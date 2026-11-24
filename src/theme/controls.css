@@ -1,0 +1,204 @@
+:root {
+  --ctl: clamp(36px, 5.2vmin, 48px);
+}
+
+[data-slot='steuerung'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  min-height: var(--ctl);
+}
+
+.ctl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  box-sizing: border-box;
+  min-width: var(--ctl);
+  height: var(--ctl);
+  padding: 0 var(--s2);
+  font-size: clamp(13px, 1.9vmin, 17px);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    opacity 300ms ease,
+    border-color 300ms ease;
+}
+.ctl svg {
+  width: clamp(18px, 2.6vmin, 24px);
+  height: clamp(18px, 2.6vmin, 24px);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ctl svg .acc {
+  stroke: var(--focus);
+}
+.ctl svg .acc.fill {
+  fill: var(--focus);
+}
+.ctl[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+.ctl[aria-disabled='true']:hover {
+  border-color: var(--line);
+}
+.ctl[aria-pressed='true'] {
+  border-color: var(--focus);
+}
+[data-action='sound'][aria-pressed='true'] .acc.off,
+[data-action='sound'][aria-pressed='false'] .acc.on {
+  display: none;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  max-width: 100%;
+}
+.controls-stack {
+  display: grid;
+}
+.controls-main,
+.controls-done,
+.controls-aux {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+}
+.controls-main,
+.controls-done {
+  grid-area: 1 / 1;
+  transition:
+    opacity 300ms ease,
+    visibility 300ms;
+}
+.controls[data-done='false'] .controls-done,
+.controls[data-done='true'] .controls-main {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Kleine Bildschirme: Beschriftung bleibt als aria-label und Tooltip, damit alle Knöpfe in eine Zeile passen. */
+@media (max-width: 480px) {
+  .ctl-wide:not([data-action='nochmal']):not([data-action='weiter-ablauf']) .ctl-text,
+  .controls-done .ctl svg {
+    display: none;
+  }
+  .ctl-wide:not([data-action='nochmal']):not([data-action='weiter-ablauf']) {
+    padding: 0;
+  }
+}
+
+/* Fortschrittsleiste */
+.progress {
+  display: flex;
+  align-items: center;
+  width: min(100%, 48em);
+}
+.progress-dot {
+  appearance: none;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: var(--s6);
+  height: var(--s5);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.progress-dot:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.progress-dot .dot {
+  display: block;
+  width: var(--s2);
+  height: var(--s2);
+  border-radius: 50%;
+  background: var(--muted);
+  transition:
+    background-color 300ms ease,
+    box-shadow 300ms ease;
+}
+.progress-dot[data-kurz='true'] .dot {
+  width: var(--s1);
+  height: var(--s1);
+}
+.progress-dot[data-state='done'] .dot {
+  background: var(--dc);
+}
+.progress-dot[data-state='now'] .dot {
+  background: var(--dc);
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--dc);
+}
+
+/* Detail-Ebene */
+.detail-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+.detail {
+  position: absolute;
+  box-sizing: border-box;
+  top: calc(var(--dl-edge) + var(--s2));
+  left: var(--s3);
+  right: var(--s3);
+  bottom: calc(var(--dl-bottom) + var(--s2));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--s3) var(--s3);
+  background: var(--card);
+  color: var(--ink);
+  border: 2px solid var(--c, var(--focus));
+  border-radius: var(--radius);
+}
+#app[data-format='quer'] .detail {
+  top: var(--s3);
+  left: calc(var(--dl-edge) + var(--s2));
+}
+.detail:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.detail-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  padding: var(--s2) 0;
+  background: var(--card);
+}
+.detail h2 {
+  margin: 0;
+  font-size: clamp(16px, 2.6vmin, 24px);
+  line-height: 1.2;
+}
+.detail p {
+  margin: 0 0 var(--s2);
+  font-size: clamp(14px, 2.2vmin, 20px);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}

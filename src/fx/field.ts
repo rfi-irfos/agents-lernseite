@@ -78,6 +78,12 @@ export class Field {
     return new Promise((res) => setTimeout(res, ms))
   }
 
+  /** Zurück in den ruhigen Zustand (für „Nochmal“ und „Nächster Ablauf“): keine Ströme, kein Tiefenflug. */
+  reset(): void {
+    this.streams = []
+    this.boost = this.boostTarget = 0
+  }
+
   destroy(): void {
     if (this.raf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this.raf)
     this.raf = 0

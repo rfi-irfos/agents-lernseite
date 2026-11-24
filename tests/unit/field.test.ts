@@ -50,4 +50,13 @@ describe('Field', () => {
     expect(last.y).toBeCloseTo(0, 5)
     f.destroy()
   })
+  it('reset beruhigt Tiefenflug und Ströme', () => {
+    const f = new Field(canvas(null, {}))
+    void f.dive(1000)
+    void f.stream({ x: 0, y: 0 } as DOMPoint, { x: 1, y: 1 } as DOMPoint, 1000)
+    f.reset()
+    const st = f as unknown as { boost: number; boostTarget: number; streams: unknown[] }
+    expect([st.boost, st.boostTarget, st.streams.length]).toEqual([0, 0, 0])
+    f.destroy()
+  })
 })

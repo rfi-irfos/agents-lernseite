@@ -43,6 +43,7 @@ export function runScenes(o: Opts): () => void {
   let token = 0
   let holding = false
   let calls: gsap.core.Tween[] = []
+  let safety: gsap.core.Tween | undefined
 
   const enter = () => {
     const my = ++token
@@ -95,7 +96,8 @@ export function runScenes(o: Opts): () => void {
       },
     }
     player.beginTransition() // Text zuerst: die Lesezeit zählt erst, wenn der Text steht
-    gsap.delayedCall(SAFETY_S, () => {
+    safety?.kill()
+    safety = gsap.delayedCall(SAFETY_S, () => {
       if (my === token) player.endTransition()
     })
     tl = sceneFor(step.station, o.scenario.art)(ctx)
@@ -121,10 +123,12 @@ export function runScenes(o: Opts): () => void {
   if (auto) gsap.ticker.add(tick)
 
   return () => {
+    token++ // verspätete Rückrufe (Notausgang, Quiz) verfallen
     offStep()
     offTimeout()
     calls.forEach((c) => c.kill())
     if (auto) gsap.ticker.remove(tick)
+    safety?.kill()
     tl?.kill()
   }
 }
