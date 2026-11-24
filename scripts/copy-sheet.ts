@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { scenarios } from '../src/scenarios'
 import { de } from '../src/content/de'
 import type { Scenario, StationScript } from '../src/engine/types'
-import { handelnTexte } from './copy-lib'
+import { handelnTexte, uiUnits, UI_ERLAUBT } from './copy-lib'
 
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const name = (id: string) => (de.stationNamen as Record<string, string>)[id] ?? id
@@ -43,6 +43,36 @@ function ablauf(s: Scenario): string {
 <h3>Antwort</h3><p class="text">${esc(s.ergebnis)}</p></article>`
 }
 
+const MERKSATZ = 'de.rueckblick.besser.merksatz'
+
+/** UI-Texte aus de.ts, nach Bereich gruppiert. Zabihs Merksatz trägt einen sichtbaren Hinweis für ihn. */
+function uiSection(): string {
+  const groups = new Map<string, { wo: string; text: string }[]>()
+  for (const u of uiUnits(de)) {
+    const g = u.wo.split('.').slice(0, 2).join('.')
+    groups.set(g, [...(groups.get(g) ?? []), u])
+  }
+  const erlaubt = new Set(UI_ERLAUBT.map((a) => a.wo))
+  const rows = [...groups]
+    .map(
+      ([g, us]) =>
+        `<h3>${esc(g)}</h3><ul class="ui">${us
+          .map(
+            (u) =>
+              `<li><small>${esc(u.wo)}:</small> ${esc(u.text)}${
+                u.wo === MERKSATZ
+                  ? ' <mark class="frage">Verneinung im Originalsatz – bitte umformulieren?</mark>'
+                  : erlaubt.has(u.wo)
+                    ? ' <small>(Vorgabe der Spezifikation)</small>'
+                    : ''
+              }</li>`,
+          )
+          .join('')}</ul>`,
+    )
+    .join('')
+  return `<article><h2>UI-Texte <small>src/content/de.ts</small></h2>${rows}</article>`
+}
+
 const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Texte: So arbeitet ein KI-Agent</title>
 <style>
 body{font:16px/1.5 system-ui,"Segoe UI",Inter,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;color:#1B2433;background:#F4F6FA}
@@ -55,9 +85,12 @@ h4{margin:.5rem 0 .25rem}
 .daten{margin:.25rem 0;padding-left:1.25rem;list-style:square}
 .tiefer{margin:.25rem 0;padding-left:1.25rem;color:#1B2433}
 .karten{margin:.25rem 0}.richtig{font-weight:700}
+.ui{margin:.25rem 0;padding-left:1.25rem;list-style:square}
+mark.frage{background:#FFE9A8;color:#1B2433;padding:0 .35em;border-radius:6px;font-weight:700}
 </style></head><body><h1>Alle Texte je Ablauf und Station</h1>
 <p>Zum Gegenlesen. Fett bei den Karten: die richtige Wahl.</p>
 ${scenarios.map(ablauf).join('\n')}
+${uiSection()}
 </body></html>`
 
 mkdirSync('test-out', { recursive: true })

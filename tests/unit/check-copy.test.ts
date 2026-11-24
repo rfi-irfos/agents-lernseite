@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { sentences, checkScenario, repeatedTrigrams, collect, handelnTexte } from '../../scripts/copy-lib'
+import { sentences, checkScenario, repeatedTrigrams, collect, handelnTexte, uiUnits, checkUi, UI_ERLAUBT } from '../../scripts/copy-lib'
+import { de } from '../../src/content/de'
 import { scenario } from './fixtures'
 import { scenarios } from '../../src/scenarios'
 
@@ -147,4 +148,30 @@ describe('Plan, Werkzeugfrage und Karten auf dem Bildschirm', () => {
 
 describe('echte Abläufe', () => {
   for (const s of scenarios) it(`${s.id}: 0 Funde`, () => expect(checkScenario(s)).toEqual([]))
+})
+
+describe('UI-Texte (de.ts)', () => {
+  it('sammelt alle Zeichenketten mit Pfad', () => {
+    const u = uiUnits({ a: { b: 'Eins.', c: 'Zwei.' }, d: 'Drei.' })
+    expect(u.map((x) => [x.wo, x.text])).toEqual([['de.a.b', 'Eins.'], ['de.a.c', 'Zwei.'], ['de.d', 'Drei.']])
+    expect(uiUnits(de).length).toBeGreaterThan(60)
+  })
+  it('findet Verneinung, ASCII-Umlaut, Gratis, Fachwort und lange Sätze', () => {
+    const r = (t: string) => checkUi([{ wo: 'de.x', art: 'sonst', text: t }]).map((f) => f.regel)
+    expect(r('Das geht ohne Hilfe.')).toContain('Verneinung')
+    expect(r('Das ist fuer alle da.')).toContain('Umlaut')
+    expect(r('Das ist gratis.')).toContain('Gratis')
+    expect(r('Der Prompt hilft.')).toContain('Fachwort')
+    expect(r(Array(19).fill('wort').join(' '))).toContain('Satzlänge')
+    expect(r('Das ist klar.')).toEqual([])
+  })
+  it('Ausnahmen: genau zwei, Merksatz und KI-Modell-Hinweis, nur für die Verneinung', () => {
+    expect(UI_ERLAUBT).toHaveLength(2)
+    expect(checkUi(uiUnits(de))).toEqual([])
+    // die Ausnahme gilt nur für den Wortlaut: eine Abwandlung wird gemeldet
+    const abw = [{ wo: 'de.rueckblick.besser.merksatz', art: 'sonst' as const, text: de.rueckblick.besser.merksatz + ' Nie ohne Hilfe.' }]
+    expect(checkUi(abw).map((f) => f.regel)).toContain('Verneinung')
+    // andere Regeln greifen auch bei erlaubten Texten
+    expect(checkUi([{ wo: 'de.start.note', art: 'sonst', text: de.start.note }]).map((f) => f.regel)).toEqual([])
+  })
 })

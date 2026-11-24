@@ -134,9 +134,41 @@ export function repeatedTrigrams(units: Unit[]): { folge: string; wo: string[] }
   return [...seen].filter(([, wo]) => wo.size > 1).map(([folge, wo]) => ({ folge, wo: [...wo] }))
 }
 
+/** Alle Zeichenketten eines (verschachtelten) Textobjekts mit ihrem Pfad, etwa „de.start.note“. */
+export function uiUnits(obj: unknown, pre = 'de'): Unit[] {
+  if (typeof obj === 'string') return obj.trim() ? [{ wo: pre, art: 'sonst', text: obj }] : []
+  if (obj && typeof obj === 'object') return Object.entries(obj).flatMap(([k, v]) => uiUnits(v, `${pre}.${k}`))
+  return []
+}
+
+/**
+ * Genau zwei Ausnahmen von der Verneinungsregel, wörtlich:
+ * Zabihs Merksatz (sein Wortlaut, Vorgabe der Spezifikation) und der vorgeschriebene Hinweis zum Modell.
+ */
+export const UI_ERLAUBT: readonly { wo: string; text: string }[] = [
+  {
+    wo: 'de.rueckblick.besser.merksatz',
+    text: 'Ein Agent wird nur besser, wenn er Rückmeldung bekommt, sie speichert und beim nächsten Mal nutzt. Ohne Prüfung durch einen Menschen kann er auch schlechter werden.',
+  },
+  { wo: 'de.start.note', text: 'Im Hintergrund läuft kein echtes KI-Modell.' },
+]
+
+/** Prüft die UI-Texte mit denselben Regeln wie die Abläufe (ohne Wiederholungs- und Satzanzahl-Regel). */
+export function checkUi(units: Unit[]): Fund[] {
+  return checkUnits(units, (u) => UI_ERLAUBT.some((a) => a.wo === u.wo && a.text === u.text))
+}
+
 export function checkScenario(s: Scenario): Fund[] {
+  const funde = checkUnits(collect(s))
+  // Planschritte sind die Plankarten zum Plansatz und wiederholen ihn mit Absicht.
+  for (const r of repeatedTrigrams(collect(s).filter((x) => !x.wo.includes('/Schritt ') && x.art !== 'daten' && x.art !== 'code'))) {
+    funde.push({ regel: 'Wiederholung', wo: r.wo.join(' und '), hinweis: `Wortfolge „${r.folge}“` })
+  }
+  return funde
+}
+
+function checkUnits(units: Unit[], erlaubtOhneVerneinung: (u: Unit) => boolean = () => false): Fund[] {
   const funde: Fund[] = []
-  const units = collect(s)
   for (const u of units) {
     if (u.art === 'code') continue
     for (const satz of sentences(u.text)) {
@@ -155,6 +187,7 @@ export function checkScenario(s: Scenario): Fund[] {
       }
     }
     for (const re of NEGATION) {
+      if (erlaubtOhneVerneinung(u)) break
       const m = u.text.match(re)
       if (m) funde.push({ regel: 'Verneinung', wo: u.wo, hinweis: `„${m[0]}“` })
     }
@@ -165,10 +198,6 @@ export function checkScenario(s: Scenario): Fund[] {
         funde.push({ regel: 'Umlaut', wo: u.wo, hinweis: `„${w}“ mit ASCII-Ersatz` })
       }
     }
-  }
-  // Planschritte sind die Plankarten zum Plansatz und wiederholen ihn mit Absicht.
-  for (const r of repeatedTrigrams(units.filter((x) => !x.wo.includes('/Schritt ') && x.art !== 'daten' && x.art !== 'code'))) {
-    funde.push({ regel: 'Wiederholung', wo: r.wo.join(' und '), hinweis: `Wortfolge „${r.folge}“` })
   }
   return funde
 }
