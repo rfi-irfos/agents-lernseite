@@ -13,7 +13,8 @@ import { Player } from './engine/player'
 import { Sound } from './engine/sound'
 import { Field } from './fx/field'
 import { dive } from './scenes/dive'
-import { isTest, pushEvent, reducedMotion } from './env'
+import { gsap } from 'gsap'
+import { dur, isTest, pushEvent, reducedMotion } from './env'
 import type { Format } from './engine/types'
 
 applyTheme(initialTheme())
@@ -38,6 +39,22 @@ fxSlot.append(canvas)
 const field = new Field(canvas)
 const sound = new Sound()
 
+function showHint(player: Player): void {
+  const hint = document.createElement('p')
+  hint.className = 'start-hint'
+  hint.dataset.hint = 'beispiel'
+  hint.textContent = de.start.beispielHinweis
+  slot('text').append(hint)
+  pushEvent({ type: 'beispiel' })
+  gsap.fromTo(hint, { opacity: 0 }, { opacity: 1, duration: dur(reducedMotion() ? 0.1 : 0.5), ease: 'power2.inOut' })
+  // bleibt lesbar bis zum ersten Weiterschalten
+  const off = player.on('step', (p) => {
+    if (p.index === 0) return
+    off()
+    gsap.to(hint, { opacity: 0, duration: dur(reducedMotion() ? 0.1 : 0.4), ease: 'power2.inOut', onComplete: () => hint.remove() })
+  })
+}
+
 const unmount = mountStart(app, scenarios, ({ scenario, eingabe, beispiel }) => {
   const steps = buildSteps(scenario)
   const player = new Player(steps)
@@ -52,9 +69,9 @@ const unmount = mountStart(app, scenarios, ({ scenario, eingabe, beispiel }) => 
     reduced: reducedMotion(),
     sound,
   })
-  void beispiel
   tl.eventCallback('onComplete', () => {
     unmount()
+    if (beispiel) showHint(player)
     player.start()
   })
 })

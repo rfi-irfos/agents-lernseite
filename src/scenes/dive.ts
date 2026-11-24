@@ -36,24 +36,47 @@ export const dive: SceneBuilder = (ctx) => {
     return tl
   }
 
-  // 1. Tor
-  tl.to(startParts, { opacity: 0, duration: dur(0.35) }, 0)
+  // 1. Tor: das Eingabefeld wächst (gemessen, Position und Größe) zum Rahmen der Bühne
+  const B = 0.4
+  tl.to(startParts, { opacity: 0, duration: dur(0.3) }, 0)
   if (gate) {
-    tl.to(gate, { boxShadow: `0 0 0 ${4}px ${focus}`, borderColor: focus, duration: dur(0.35) }, 0)
+    const from = gate.getBoundingClientRect()
+    const slotH = eingabe.getBoundingClientRect().height
+    const to = buehne.getBoundingClientRect()
+    const kids = Array.from(gate.children)
+    tl.set(eingabe, { height: slotH }, 0)
+    tl.set(
+      gate,
+      { position: 'fixed', zIndex: 2, boxSizing: 'border-box', left: from.left, top: from.top, width: from.width, height: from.height },
+      0,
+    )
+    tl.to(kids, { opacity: 0, duration: dur(0.2) }, 0)
+    tl.to(gate, { left: to.left, top: to.top, width: to.width, height: to.height, borderColor: focus, duration: dur(B) }, 0)
   }
-  // 2. Flug hinein
-  tl.call(toPlay, undefined, dur(0.35))
-  tl.set([buehne, text], { opacity: 0 }, dur(0.35))
+  // 2. Flug hinein: Bühne 0.6 → 1, das Tor blendet dabei aus
+  tl.call(toPlay, undefined, dur(B))
+  tl.set([buehne, text], { opacity: 0 }, dur(B))
   tl.fromTo(
     buehne,
     { scale: 0.6, opacity: 0, transformOrigin: '50% 100%' },
     { scale: 1, opacity: 1, duration: dur(0.9), clearProps: 'transform,opacity' },
-    dur(0.35),
+    dur(B),
   )
-  tl.to(text, { opacity: 1, duration: dur(0.5), clearProps: 'opacity' }, dur(0.75))
-  tl.call(() => { void ctx.field.dive(dur(900)) }, undefined, dur(0.35))
-  tl.call(() => ctx.sound.play('eintauchen'), undefined, dur(0.35))
-  if (gate) tl.to(gate, { opacity: 0, duration: dur(0.4) }, dur(0.6))
+  tl.to(text, { opacity: 1, duration: dur(0.5), clearProps: 'opacity' }, dur(B + 0.4))
+  tl.call(() => { void ctx.field.dive(dur(900)) }, undefined, dur(B))
+  tl.call(() => ctx.sound.play('eintauchen'), undefined, dur(B))
+  if (gate) {
+    tl.to(gate, { opacity: 0, duration: dur(0.5) }, dur(B + 0.2))
+    tl.to(
+      eingabe,
+      {
+        height: () => parseFloat(getComputedStyle(eingabe).minHeight) || 0,
+        duration: dur(0.5),
+        clearProps: 'height',
+      },
+      dur(B + 0.2),
+    )
+  }
 
   // 3. Daten-Kugel
   const orb = document.createElement('div')
@@ -64,9 +87,9 @@ export const dive: SceneBuilder = (ctx) => {
     const g = (gate ?? eingabe).getBoundingClientRect()
     buehne.append(orb)
     gsap.set(orb, { left: g.left + g.width / 2 - b.left, top: g.top + g.height / 2 - b.top, opacity: 0 })
-  }, undefined, dur(1.0))
-  tl.to(orb, { opacity: 1, duration: dur(0.15) }, dur(1.0))
-  tl.to(orb, { left: '50%', top: '45%', duration: dur(0.6) }, dur(1.0))
-  tl.to(orb, { opacity: 0, duration: dur(0.2), onComplete: () => orb.remove() }, dur(1.6))
+  }, undefined, dur(B + 0.65))
+  tl.to(orb, { opacity: 1, duration: dur(0.15) }, dur(B + 0.65))
+  tl.to(orb, { left: '50%', top: '45%', duration: dur(0.6) }, dur(B + 0.65))
+  tl.to(orb, { opacity: 0, duration: dur(0.2), onComplete: () => orb.remove() }, dur(B + 1.25))
   return tl
 }

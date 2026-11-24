@@ -144,7 +144,7 @@ export function mountStart(
       const direct = scenarios.find((s) => s.id === selected!.id)
       r = direct
         ? { scenario: direct, eingabe: eingabeText, beispiel: false }
-        : { ...matchScenario(eingabeText, scenarios), eingabe: eingabeText }
+        : { scenario: matchScenario(eingabeText, scenarios).scenario, eingabe: eingabeText, beispiel: false }
     } else {
       r = { ...matchScenario(eingabeText, scenarios), eingabe: eingabeText }
     }
