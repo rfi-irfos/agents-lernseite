@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
 
+// CSS-Dateien als Text lesen (die Vitest-CSS-Verarbeitung liefert für ?raw leere Inhalte); ohne Node-Typen über Variable.
+const nodeFs = 'node:fs'
+const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as { readFileSync: (u: URL, enc: string) => string }
 const read = (p: string) => readFileSync(new URL(`../../src/${p}`, import.meta.url), 'utf8')
 const tokens = read('theme/tokens.css')
 const rb = read('scenes/rueckblick/rueckblick.css')
