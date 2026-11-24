@@ -13,7 +13,7 @@ const VIEWPORTS = [
   { w: 1920, h: 1080 },
 ]
 
-type TW = { __player?: { index: number; state: string; step: { station: string }; goTo(i: number): void } }
+type TW = { __player?: { index: number; state: string; step: { station: string }; goTo(i: number): void; pause(): void } }
 
 async function check(page: Page, label: string, station: string): Promise<void> {
   const m = await page.evaluate(({ slots, station }) => {
