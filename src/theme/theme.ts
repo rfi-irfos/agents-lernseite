@@ -16,9 +16,15 @@ export function applyTheme(t: Theme): void {
   document.documentElement.dataset.theme = t
 }
 
+const FADE_CLEANUP_MS = 400 // etwas länger als --theme-fade (300 ms)
+let fadeTimer: ReturnType<typeof setTimeout> | undefined
+
 export function toggleTheme(): Theme {
   const next: Theme = currentTheme() === 'dark' ? 'light' : 'dark'
-  document.documentElement.classList.add('theme-fade')
+  const root = document.documentElement
+  root.classList.add('theme-fade')
+  clearTimeout(fadeTimer)
+  fadeTimer = setTimeout(() => root.classList.remove('theme-fade'), FADE_CLEANUP_MS)
   applyTheme(next)
   safeStore.set('theme', next)
   return next

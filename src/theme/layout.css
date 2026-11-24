@@ -1,0 +1,96 @@
+#app {
+  position: relative;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh; /* Rückfall */
+  height: 100dvh;
+  padding: var(--s3);
+  display: grid;
+  gap: var(--s3);
+  overflow: hidden;
+}
+
+[data-slot] {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-slot='fx'] {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-slot='buehne'],
+[data-slot='text'] {
+  min-height: var(--s7);
+  min-width: var(--s7);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+[data-slot='eingabe'],
+[data-slot='steuerung'] {
+  min-height: var(--s6);
+  min-width: var(--s7);
+}
+
+[data-slot='buehne'] {
+  grid-area: buehne;
+}
+[data-slot='text'] {
+  grid-area: text;
+}
+[data-slot='eingabe'] {
+  grid-area: eingabe;
+}
+[data-slot='steuerung'] {
+  grid-area: steuerung;
+}
+
+/* vorläufiger Platz des Themenschalters, Task 9 verschiebt ihn in die Steuerleiste */
+#app > [data-action='theme'] {
+  position: absolute;
+  top: var(--s2);
+  right: var(--s2);
+  z-index: 3;
+}
+
+#app[data-format='hoch'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 5fr) minmax(0, 3fr) auto auto;
+  grid-template-areas:
+    'buehne'
+    'text'
+    'eingabe'
+    'steuerung';
+}
+
+#app[data-format='quadrat'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 6fr) minmax(0, 2fr) auto auto;
+  grid-template-areas:
+    'buehne'
+    'text'
+    'eingabe'
+    'steuerung';
+}
+
+#app[data-format='quer'] {
+  grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    'buehne text'
+    'buehne eingabe'
+    'steuerung steuerung';
+}
+
+#app[data-format='quer'] [data-slot='buehne'] {
+  max-width: min(100vw, calc(2.2 * 100vh)); /* Rückfall */
+  max-width: min(100vw, calc(2.2 * 100dvh));
+}

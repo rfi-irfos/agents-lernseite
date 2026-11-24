@@ -11,6 +11,16 @@
   --orb: #f04d20;
   --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --theme-fade: 300ms;
+  /* Stationsfarben aus Zabihs Vorlage; Prüfen teilt sich die Farbe mit dem Gedächtnis */
+  --c-eingabe: #0060b8;
+  --c-wahrnehmung: #23814a;
+  --c-denken: #6b3fc0;
+  --c-gedaechtnis: #c93b52;
+  --c-planung: #2f6fb0;
+  --c-werkzeug: #0b7f78;
+  --c-handeln: #b86a0e;
+  --c-pruefen: #c93b52;
+  --c-ergebnis: #0b6b4c;
   color-scheme: light;
 }
 

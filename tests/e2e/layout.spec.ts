@@ -95,7 +95,7 @@ test('Drehen 360x740 auf 740x360 morpht in höchstens 700 ms, kein Sprung', asyn
   const m = await page.evaluate(() => {
     const w = window as unknown as { __m: Record<string, number[]> }
     const r = document.querySelector('[data-slot=buehne]')!.getBoundingClientRect()
-    return { ...w.__m, end: [r.left, r.top, r.width, r.height] }
+    return { ...w.__m, end: [r.left, r.top, r.width, r.height] } as Record<string, number[]>
   })
   const start = m.start as number[]
   const end = m.end as number[]
