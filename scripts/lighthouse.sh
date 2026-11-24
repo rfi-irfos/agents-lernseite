@@ -1,5 +1,5 @@
 set -e
-npm ci >/dev/null 2>&1; npx playwright install chromium >/dev/null 2>&1; npm run build >/dev/null 2>&1
+npm ci >/dev/null 2>&1; npx playwright install chromium >/dev/null 2>&1; npm run build 2>&1 | tail -8
 (npx vite preview --host 127.0.0.1 --port 4174 --strictPort >/tmp/prev.log 2>&1 &)
 for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
 curl -sI http://127.0.0.1:4174/ | head -1
