@@ -197,11 +197,13 @@
 }
 .plankarte {
   box-sizing: border-box;
-  flex: 1 1 18%;
-  min-width: min(100%, 14ch);
+  flex: 1 1 40%;
+  min-width: min(100%, 16ch);
   max-width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--s2);
   padding: var(--s3);
   border: 2px solid var(--line);
@@ -209,7 +211,9 @@
   background: var(--card);
   color: var(--ink);
   font-size: clamp(13px, 2.2vmin, 22px);
-  overflow-wrap: anywhere;
+  text-align: center;
+  overflow-wrap: normal;
+  hyphens: manual;
 }
 .plan-nr {
   flex: 0 0 auto;

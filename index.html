@@ -13,7 +13,28 @@
       #app:not([data-phase]) {
         visibility: hidden;
       }
+      #boot-hint {
+        position: fixed;
+        inset: auto 0 20% 0;
+        z-index: 5;
+        margin: 0;
+        padding: 0 16px;
+        text-align: center;
+        font: 600 18px system-ui, sans-serif;
+        color: var(--ink, #1b2433);
+      }
+      #boot-hint[hidden],
+      #app[data-phase] ~ #boot-hint {
+        display: none;
+      }
     </style>
+    <noscript>
+      <style>
+        #app {
+          visibility: visible;
+        }
+      </style>
+    </noscript>
     <title>So arbeitet ein KI-Agent</title>
     <meta name="description" content="Schritt für Schritt erklärt: Wie ein KI-Agent eine Aufgabe versteht, plant, Werkzeuge nutzt und sein Ergebnis prüft." />
     <script>
@@ -41,11 +62,19 @@
         <button type="button" class="glass ctl" data-action="theme" data-contrast-check></button>
       </div>
     </div>
+    <p id="boot-hint" hidden>Die Seite lädt gerade. Lade sie bitte neu.</p>
     <script id="format-init">
       // Format vor dem ersten Zeichnen setzen (gleiche Schwellen wie src/engine/format.ts), damit das Layout nicht nachspringt.
       ;(function () {
         var r = innerWidth / innerHeight
         document.getElementById('app').dataset.format = r < 0.8 ? 'hoch' : r > 1.25 ? 'quer' : 'quadrat'
+        // Rückfall: baut sich der Startbildschirm nicht auf, wird die Seite nach 3 s sichtbar und nennt den Grund.
+        setTimeout(function () {
+          var app = document.getElementById('app')
+          if (app.dataset.phase) return
+          app.style.visibility = 'visible'
+          document.getElementById('boot-hint').hidden = false
+        }, 3000)
       })()
     </script>
     <script type="module" src="/src/main.ts"></script>

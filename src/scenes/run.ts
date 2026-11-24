@@ -3,7 +3,7 @@ import type { Player } from '../engine/player'
 import type { Scenario } from '../engine/types'
 import type { Sound } from '../engine/sound'
 import type { Field } from '../fx/field'
-import { isTest, reducedMotion } from '../env'
+import { isTest, pushEvent, reducedMotion } from '../env'
 import { AGENT_EVENT } from '../ui/quiz'
 import { sceneFor } from './registry'
 import type { SceneCtx } from './types'
@@ -105,6 +105,15 @@ export function runScenes(o: Opts): () => void {
       if (my === token) player.endTransition()
     })
     tl = sceneFor(step.station, o.scenario.art)(ctx)
+    // Meldet das Ende der Szene (für Tests und das Kontaktblatt): data-szene=fertig, Ereignis szene-fertig.
+    app.dataset.szene = 'laeuft'
+    const fertig = () => {
+      if (my !== token) return
+      app.dataset.szene = 'fertig'
+      pushEvent({ type: 'szene-fertig', index: player.index })
+    }
+    if (tl.totalDuration() === 0 || tl.progress() === 1) fertig()
+    else tl.eventCallback('onComplete', fertig)
   }
 
   const offStep = player.on('step', enter)

@@ -2,10 +2,11 @@
 // Läuft nur auf der Kolonie (Browser). Erwartet die gebaute App unter BASE_URL (Standard http://localhost:4174).
 import { mkdirSync, writeFileSync, readdirSync, statSync, rmSync } from 'node:fs'
 import { chromium, type Page } from '@playwright/test'
+import { scenarios } from '../src/scenarios'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:4174'
 const OUT = 'test-out/contact'
-const SCENARIOS = ['wetter', 'flugsuche', 'programm', 'foto', 'ausflug']
+const SCENARIOS = scenarios.map((s) => s.id)
 const FORMATS = [
   { id: 'hoch', w: 360, h: 740 },
   { id: 'quadrat', w: 820, h: 1000 },
@@ -22,8 +23,9 @@ const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 async function settle(page: Page, i: number): Promise<void> {
   await page.evaluate((n) => (window as unknown as TW).__player!.goTo(n), i)
   await page.waitForFunction((n) => (window as unknown as TW).__player!.index === n, i, { timeout: 15000 })
-  await page.waitForFunction(() => (window as unknown as TW).__player!.state !== 'transition', undefined, { timeout: 15000 })
-  await page.waitForTimeout(1400) // echte Bewegung ausklingen lassen
+  // Endzustand abwarten: die Szene meldet ihr Ende (data-szene=fertig, src/scenes/run.ts), danach kurz ausklingen lassen
+  await page.waitForSelector('#app[data-szene=fertig]', { timeout: 60000 })
+  await page.waitForTimeout(500)
 }
 
 async function main(): Promise<void> {
