@@ -6,15 +6,13 @@ for i in $(seq 1 30); do curl -sf http://127.0.0.1:$PORT/ >/dev/null && break; s
 curl -sI http://127.0.0.1:$PORT/ | head -1
 mkdir -p test-out/lighthouse
 export CHROME_PATH=$(node -e 'import("@playwright/test").then(m=>console.log(m.chromium.executablePath()))')
-npx --yes lighthouse@12 http://127.0.0.1:$PORT/ --chrome-flags="--headless=new --no-sandbox" --output=json --output=html --output-path=test-out/lighthouse/report --quiet 2>&1 | tail -5
-node -e '
-const r=JSON.parse(require("fs").readFileSync("test-out/lighthouse/report.report.json"));
-console.log(r.lighthouseVersion);
-for(const [k,v] of Object.entries(r.categories))console.log(k,v.score);
-for(const id of ["installable-manifest","service-worker","splash-screen","themed-omnibox","viewport","maskable-icon"]){const a=r.audits[id];console.log(id,a?a.score:"n/a")}
-for(const [id,a] of Object.entries(r.audits)) if(a.score!==null&&a.score<1&&a.scoreDisplayMode!=="informative"&&a.scoreDisplayMode!=="notApplicable") console.log("FAIL",id,a.score,a.displayValue||"")
-for(const k of ["first-contentful-paint","largest-contentful-paint","total-blocking-time","cumulative-layout-shift","speed-index"])console.log(k,r.audits[k].displayValue)
+for RUN in 1 2 3; do
+  npx --yes lighthouse@12 http://127.0.0.1:$PORT/ --chrome-flags="--headless=new --no-sandbox" --output=json --output=html --output-path=test-out/lighthouse/run$RUN --quiet 2>&1 | tail -5
+  node -e '
+const r=JSON.parse(require("fs").readFileSync("test-out/lighthouse/run'$RUN'.report.json"));
+console.log("run '$RUN'", r.lighthouseVersion, Object.entries(r.categories).map(([k,v])=>k+"="+v.score).join(" "), "TBT", r.audits["total-blocking-time"].displayValue, "LCP", r.audits["largest-contentful-paint"].displayValue)
 '
+done
 # Lighthouse 12 hat keine PWA-Kategorie mehr: Installierbarkeit direkt von Chrome (CDP Page.getInstallabilityErrors)
 cat > test-out/lighthouse/installability.mjs <<'JS'
 import { chromium } from '@playwright/test'
