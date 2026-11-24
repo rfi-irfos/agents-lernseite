@@ -49,6 +49,7 @@ export function runScenes(o: Opts): () => void {
     tl?.kill()
     slots.buehne.replaceChildren()
     slots.text.querySelectorAll('.erzaehl').forEach((n) => n.remove())
+    slots.eingabe.querySelectorAll('.chatblase').forEach((n) => n.remove())
     holding = false
     calls.forEach((c) => c.kill())
     calls = []

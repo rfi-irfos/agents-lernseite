@@ -66,7 +66,7 @@ test('Handeln bild: Abtastlinie, Markierungen, lokales Bild', async ({ page }) =
   await startAt(page, { eingabe: 'zzbild', at: HANDELN })
   await expect(page.locator('.abtastlinie')).toHaveCount(1)
   await expect(page.locator('.markierung')).toHaveCount(2)
-  await expect(page.locator('.bildrahmen img')).toBeVisible()
+  await expect(page.locator('.bildrahmen svg')).toBeVisible()
   expect(external).toEqual([])
 })
 

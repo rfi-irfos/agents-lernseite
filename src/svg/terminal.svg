@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" role="img" aria-hidden="true" focusable="false">
+  <rect class="g-base" x="6" y="6" width="84" height="60" rx="8"/>
+  <path class="g-acc" d="M6 20h84"/>
+  <circle class="g-acc-fill" cx="16" cy="13" r="2.5"/>
+  <circle class="g-acc-fill" cx="25" cy="13" r="2.5"/>
+  <path class="g-acc" d="M18 32l10 8-10 8"/>
+  <path class="g-acc" d="M36 50h22"/>
+</svg>

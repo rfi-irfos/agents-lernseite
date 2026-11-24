@@ -1,6 +1,13 @@
 import type { Art, StationId } from '../engine/types'
 import { orbHop, startScene } from './common'
 import { denken } from './denken'
+import { api } from './handeln/api'
+import { bild } from './handeln/bild'
+import { code } from './handeln/code'
+import { planungHandeln } from './handeln/planung'
+import { suche } from './handeln/suche'
+import { ergebnis } from './ergebnis'
+import { pruefen } from './pruefen'
 import { planung } from './planung'
 import { wahrnehmung } from './wahrnehmung'
 import { werkzeug } from './werkzeug'
@@ -13,10 +20,11 @@ const nurText: SceneBuilder = (ctx) => {
   return tl
 }
 
-const SCENES: Partial<Record<StationId, SceneBuilder>> = { wahrnehmung, denken, planung, werkzeug }
+const SCENES: Partial<Record<StationId, SceneBuilder>> = { wahrnehmung, denken, planung, werkzeug, pruefen, ergebnis }
+const HANDELN: Record<Art, SceneBuilder> = { suche, api, code, bild, planung: planungHandeln }
 
-/** Die Szene einer Station. `art` ist für die Handeln-Szenen später wichtig. */
+/** Die Szene einer Station. `art` wählt die Variante von Handeln. */
 export function sceneFor(station: StationId, art: Art): SceneBuilder {
-  void art
+  if (station === 'handeln') return HANDELN[art] ?? nurText
   return SCENES[station] ?? nurText
 }

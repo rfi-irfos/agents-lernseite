@@ -309,3 +309,357 @@
     transform: none;
   }
 }
+
+/* Handeln, Prüfen, Ergebnis. Stationsfarbe --c nur für Formen, Ränder und Akzente. */
+.treffer-liste,
+.route-punkte {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.treffer-liste {
+  width: 100%;
+  max-width: 60ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.treffer {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border: 2px solid var(--c);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-size: clamp(13px, 2.2vmin, 22px);
+  overflow-wrap: anywhere;
+}
+.treffer-icon {
+  flex: 0 0 auto;
+  width: var(--s5);
+}
+.treffer-icon svg,
+.pruef-lupe svg,
+.terminal-icon svg,
+.route-karte svg,
+.fertig-haken svg,
+.pruef-urteil svg,
+.bild-zeichnung svg,
+.testmarke svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.treffer-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.api {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s4);
+}
+.anfragekarte,
+.antwortkarte {
+  box-sizing: border-box;
+  flex: 1 1 14ch;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--s3);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-size: clamp(13px, 2.2vmin, 22px);
+  overflow-wrap: anywhere;
+}
+.antwortkarte {
+  border-color: var(--c);
+  box-shadow: 0 0 var(--s3) color-mix(in srgb, var(--c) 35%, transparent);
+}
+.karte-label {
+  font-weight: 700;
+}
+
+.code {
+  width: 100%;
+  max-width: 64ch;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.terminal {
+  box-sizing: border-box;
+  border: 2px solid var(--c);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  overflow: hidden;
+}
+.terminal-kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s1) var(--s3);
+  border-bottom: 2px solid var(--line);
+  font-size: clamp(12px, 1.8vmin, 18px);
+}
+.terminal-icon {
+  width: var(--s5);
+}
+.terminal-text {
+  margin: 0;
+  padding: var(--s3);
+  font: clamp(12px, 2vmin, 20px) / 1.5 ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.terminal-zeile {
+  display: inline-block;
+  min-height: 1.5em;
+}
+.testlauf {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-size: clamp(13px, 2.2vmin, 22px);
+  overflow-wrap: anywhere;
+}
+.testlauf[data-status='rot'] {
+  border-color: #d64545;
+}
+.testlauf[data-status='gruen'] {
+  border-color: #2e9e6b;
+}
+.testmarke {
+  flex: 0 0 auto;
+  width: var(--s5);
+  height: var(--s5);
+}
+.testlauf[data-status='rot'] .testmarke .g-acc {
+  stroke: #d64545;
+}
+.testlauf[data-status='gruen'] .testmarke .g-acc {
+  stroke: #2e9e6b;
+}
+
+.bildrahmen {
+  position: relative;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: min(100%, 60vmin);
+  border: 2px solid var(--c);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+}
+.bild-zeichnung {
+  position: absolute;
+  inset: var(--s2);
+}
+.abtastlinie {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--s1);
+  background: var(--c);
+  box-shadow: 0 0 var(--s3) var(--c);
+}
+.markierung {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.markierung-ring {
+  position: absolute;
+  left: calc(-1 * var(--s3));
+  top: calc(-1 * var(--s3));
+  width: calc(2 * var(--s3));
+  height: calc(2 * var(--s3));
+  box-sizing: border-box;
+  border: 3px solid var(--c);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c) 20%, transparent);
+}
+.markierung-text {
+  position: absolute;
+  left: var(--s4);
+  top: calc(-1 * var(--s3));
+  padding: 0 var(--s2);
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 2px solid var(--c);
+  color: var(--ink);
+  font-size: clamp(11px, 1.8vmin, 18px);
+  white-space: nowrap;
+}
+
+.route {
+  position: relative;
+  width: 100%;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.route-karte {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  display: flex;
+  justify-content: center;
+}
+.route-karte svg {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+.route-punkte {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s3);
+}
+.routenpunkt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  padding: var(--s2) var(--s3);
+  border: 2px solid var(--c);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-size: clamp(13px, 2.2vmin, 22px);
+  overflow-wrap: anywhere;
+}
+.routenpunkt-marke {
+  width: var(--s3);
+  height: var(--s3);
+  border-radius: 50%;
+  background: var(--c);
+}
+
+/* Prüfen */
+.pruefen {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s4);
+}
+.pruef-aufgabe {
+  box-sizing: border-box;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-size: clamp(13px, 2.2vmin, 22px);
+  overflow-wrap: anywhere;
+}
+.pruef-lupe {
+  flex: 0 0 auto;
+  width: var(--s5);
+}
+.pruef-urteil {
+  width: clamp(48px, 14vmin, 112px);
+  aspect-ratio: 1;
+}
+.ziel-denken {
+  padding: var(--s2) var(--s4);
+  border: 2px solid var(--c-denken);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 700;
+}
+.schleifengrund {
+  flex: 1 1 100%;
+  margin: 0;
+  text-align: center;
+  color: var(--ink);
+  font-size: clamp(14px, 2.4vmin, 24px);
+  overflow-wrap: anywhere;
+}
+.orb-rueck {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: calc(-1 * var(--s2)) 0 0 calc(-1 * var(--s2));
+  width: calc(2 * var(--s2));
+  height: calc(2 * var(--s2));
+  border-radius: 50%;
+  background: var(--orb);
+  box-shadow: 0 0 var(--s4) var(--orb);
+}
+
+/* Ergebnis */
+.fertig {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  color: var(--ink);
+  font-size: clamp(16px, 2.8vmin, 28px);
+  font-weight: 700;
+}
+.fertig-haken {
+  width: clamp(48px, 14vmin, 112px);
+  aspect-ratio: 1;
+}
+.chatblase {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--s2) var(--s3);
+  border: 2px solid var(--c);
+  border-radius: var(--radius);
+  border-top-left-radius: var(--s1);
+  background: var(--card);
+  color: var(--ink);
+  z-index: 2;
+}
+.chat-name {
+  font-size: clamp(11px, 1.6vmin, 15px);
+  font-weight: 700;
+}
+.chat-text {
+  margin: 0;
+  font-size: clamp(13px, 2vmin, 19px);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.haken-strich {
+  stroke-dasharray: 1;
+}
