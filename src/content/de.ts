@@ -76,4 +76,43 @@ export const de = {
     agent: 'Agent',
     antwortDesAgenten: 'Antwort des Agenten',
   },
+  rueckblick: {
+    weiter: 'Weiter',
+    kreislauf: {
+      label: 'Kreislauf mit acht Stationen',
+      intro: 'So läuft jede Aufgabe: Die Kugel wandert im Kreis von Station zu Station. Tippe eine Station an.',
+      gedaechtnis: 'Gedächtnis',
+      gedaechtnisText: 'Beim Denken schaut der Agent in seine Schublade mit alten Notizen.',
+      stationen: {
+        eingabe: 'Eine neue Aufgabe kommt beim Agenten an.',
+        wahrnehmung: 'Der Agent liest die Aufgabe und erkennt, worum es geht.',
+        denken: 'Der Agent überlegt, welche Schritte zur Lösung passen.',
+        planung: 'Er legt die Schritte in eine Reihenfolge.',
+        werkzeug: 'Er wählt das Werkzeug, das zur Aufgabe passt.',
+        handeln: 'Er benutzt das Werkzeug und holt ein Zwischenergebnis.',
+        pruefen: 'Er prüft, ob das Ergebnis zur Aufgabe passt. Wenn etwas fehlt, geht es zurück zum Denken.',
+        ergebnis: 'Er gibt dir die Antwort.',
+      },
+    },
+    besser: {
+      titel: 'Wird der Agent besser?',
+      chartLabel: 'Linie: Qualität der Antworten über sechs Runden',
+      gruppe: 'Verlauf wählen',
+      achseY: 'Qualität',
+      achseX: 'Runde',
+      merke: 'Merke:',
+      merksatz:
+        'Ein Agent wird nur besser, wenn er Rückmeldung bekommt, sie speichert und beim nächsten Mal nutzt. Ohne Prüfung durch einen Menschen kann er auch schlechter werden.',
+      verlaeufe: {
+        besser: { label: 'Besser', satz: 'Mit Rückmeldung wird jede Runde ein Stück besser.' },
+        gleich: { label: 'Gleich', satz: 'Ohne Rückmeldung bleibt jede Runde gleich gut.' },
+        schlechter: { label: 'Schlechter', satz: 'Speichert der Agent Falsches, wird es mit jeder Runde schlechter.' },
+      },
+    },
+    auswahl: {
+      titel: 'Was möchtest du als Nächstes sehen?',
+      label: 'Nächster Ablauf',
+      gesehen: 'gesehen',
+    },
+  },
 } as const

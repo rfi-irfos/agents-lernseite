@@ -4,6 +4,7 @@ import './theme/glass.css'
 import './theme/start.css'
 import './theme/controls.css'
 import './scenes/scenes.css'
+import './scenes/rueckblick/rueckblick.css'
 import { de } from './content/de'
 import { applyTheme, initialTheme, toggleTheme } from './theme/theme'
 import { watchFormat } from './engine/format'
@@ -20,12 +21,13 @@ import { gsap } from 'gsap'
 import { ICONS, mountControls } from './ui/controls'
 import { mountProgress } from './ui/progress-bar'
 import { closeDetail, openDetail } from './ui/detail'
-import { safeStore } from './engine/store'
+import { markSeen, safeStore, seenScenarios } from './engine/store'
+import { mountRueckblick } from './scenes/rueckblick'
 import type { Player as PlayerT } from './engine/player'
 import type { StartResult } from './ui/start'
 import { dur, isTest, pushEvent, reducedMotion } from './env'
 import type { SceneCtx } from './scenes/types'
-import type { Format, Tempo } from './engine/types'
+import type { Format, Scenario, Tempo } from './engine/types'
 
 applyTheme(initialTheme())
 watchFormat(applyFormat)
@@ -111,12 +113,35 @@ function launch(r: StartResult, tempo: Tempo, withDive: boolean): void {
     sound,
   })
 
+  /** Auswahl im Rückblick: derselbe Weg wie „Nächster Ablauf“ und Start, mit vollem Abräumen. */
+  const pick = (next: Scenario) => {
+    const t = player.tempo
+    teardown()
+    showStart()
+    launch({ scenario: next, eingabe: next.aufgabe, beispiel: false }, t, true)
+  }
+
   const run = () => {
     if (gen !== generation) return
     unmountStart?.()
     unmountStart = null
     void field.surface(800) // Eintauchen vorbei: die Partikel werden wieder ruhig
     if (beispiel) showHint(player)
+    let stopReview: (() => void) | null = null
+    const offDone = player.on('done', () => {
+      if (gen !== generation) return
+      markSeen(scenario.id)
+      stopReview?.()
+      stopReview = mountRueckblick({
+        buehne: slot('buehne'),
+        text: slot('text'),
+        eingabe: slot('eingabe'),
+        reduced: reducedMotion(),
+        scenarios: all,
+        seen: seenScenarios,
+        onPick: pick,
+      })
+    })
     const stopScenes = runScenes({ app, player, field, scenario, eingabe, sound })
     const stopProgress = mountProgress(slot('steuerung'), steps, player)
     const stopControls = mountControls(slot('steuerung'), player, sound, {
@@ -139,6 +164,8 @@ function launch(r: StartResult, tempo: Tempo, withDive: boolean): void {
     session = {
       player,
       dispose: () => {
+        offDone()
+        stopReview?.()
         stopControls()
         stopProgress()
         stopScenes()
