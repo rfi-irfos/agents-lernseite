@@ -46,6 +46,16 @@
   --focus: #8fa2ff;
   --glass: rgba(14, 22, 40, 0.55);
   --glass-hi: rgba(143, 162, 255, 0.22);
+  /* Stationsfarben im dunklen Thema: gleiche Farbtöne, aber mindestens 3:1 gegen Karte und Hintergrund */
+  --c-eingabe: #0069ca;
+  --c-wahrnehmung: #23814a;
+  --c-denken: #7a52c6;
+  --c-gedaechtnis: #c93b52;
+  --c-planung: #2f6fb0;
+  --c-werkzeug: #0b7f78;
+  --c-handeln: #b86a0e;
+  --c-pruefen: #c93b52;
+  --c-ergebnis: #0c7956;
   color-scheme: dark;
 }
 
