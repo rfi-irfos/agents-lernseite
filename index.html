@@ -35,6 +35,13 @@
         <button type="button" class="glass ctl" data-action="theme" data-contrast-check></button>
       </div>
     </div>
+    <script id="format-init">
+      // Format vor dem ersten Zeichnen setzen (gleiche Schwellen wie src/engine/format.ts), damit das Layout nicht nachspringt.
+      ;(function () {
+        var r = innerWidth / innerHeight
+        document.getElementById('app').dataset.format = r < 0.8 ? 'hoch' : r > 1.25 ? 'quer' : 'quadrat'
+      })()
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
