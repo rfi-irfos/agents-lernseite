@@ -59,4 +59,60 @@ describe('Field', () => {
     expect([st.boost, st.boostTarget, st.streams.length]).toEqual([0, 0, 0])
     f.destroy()
   })
+
+  describe('WebGL-Kontextverlust', () => {
+    function fakeGl(linkOk: () => boolean) {
+      const calls = { clear: 0, program: 0 }
+      const gl = {
+        VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, COMPILE_STATUS: 3, LINK_STATUS: 4, BLEND: 5, ONE: 6, ONE_MINUS_SRC_ALPHA: 7,
+        COLOR_BUFFER_BIT: 8, ARRAY_BUFFER: 9, DYNAMIC_DRAW: 10, FLOAT: 11, POINTS: 12,
+        createShader: () => ({}), shaderSource() {}, compileShader() {}, getShaderParameter: () => true,
+        createProgram: () => (calls.program++, {}), attachShader() {}, linkProgram() {}, getProgramParameter: () => linkOk(),
+        createBuffer: () => ({}), enable() {}, blendFunc() {}, viewport() {},
+        clearColor() {}, clear: () => void calls.clear++, useProgram() {}, bindBuffer() {}, bufferData() {},
+        getAttribLocation: () => 0, enableVertexAttribArray() {}, vertexAttribPointer() {},
+        getUniformLocation: () => ({}), uniform1f() {}, uniform3f() {}, drawArrays() {},
+      }
+      return { gl, calls }
+    }
+    function evCanvas(gl: unknown) {
+      const h: Record<string, (e: Event) => void> = {}
+      const c = { ...canvas(gl, null), addEventListener: (n: string, f: (e: Event) => void) => void (h[n] = f), removeEventListener: (n: string) => void delete h[n] }
+      return { c: c as unknown as HTMLCanvasElement, h }
+    }
+    const draw = (f: Field) => (f as unknown as { draw(): void }).draw()
+
+    it('verhindert den Standard, zeichnet währenddessen nicht und baut nach der Rückkehr neu auf', () => {
+      const { gl, calls } = fakeGl(() => true)
+      const { c, h } = evCanvas(gl)
+      const f = new Field(c)
+      expect(f.mode).toBe('webgl2')
+      expect(calls.program).toBe(1)
+      const ev = { preventDefault: vi.fn() } as unknown as Event
+      h.webglcontextlost(ev)
+      expect(ev.preventDefault).toHaveBeenCalled()
+      calls.clear = 0
+      draw(f)
+      expect(calls.clear).toBe(0)
+      h.webglcontextrestored({} as Event)
+      expect(calls.program).toBe(2)
+      expect(f.mode).toBe('webgl2')
+      draw(f)
+      expect(calls.clear).toBe(1)
+      f.destroy()
+      expect(h.webglcontextlost).toBeUndefined()
+    })
+    it('schlägt der Neuaufbau fehl, bleibt das Feld still statt zu werfen', () => {
+      let ok = true
+      const { gl } = fakeGl(() => ok)
+      const { c, h } = evCanvas(gl)
+      const f = new Field(c)
+      h.webglcontextlost({ preventDefault() {} } as unknown as Event)
+      ok = false
+      h.webglcontextrestored({} as Event)
+      expect(f.mode).toBe('off')
+      expect(() => draw(f)).not.toThrow()
+      f.destroy()
+    })
+  })
 })

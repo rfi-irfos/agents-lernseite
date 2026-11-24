@@ -30,13 +30,28 @@ export class Field {
   private raf = 0
   private last = 0
   private ro: ResizeObserver | undefined
+  private glLost = false
+  private onLost = (e: Event) => {
+    e.preventDefault() // ohne das kommt kein „restored“
+    this.glLost = true
+  }
+  private onRestored = () => {
+    // Alle GPU-Objekte sind weg: neu aufbauen. Gelingt das nicht, bleibt das Feld still (2D ist auf dieser Leinwand nicht mehr möglich).
+    const gl = this.gl
+    this.glLost = false
+    if (!gl || !this.initGl(gl)) this.mode = 'off'
+  }
   private rgb: [number, number, number] = [0.37, 0.5, 0.9]
 
   constructor(private readonly c: HTMLCanvasElement) {
     if (reduced()) return
     try {
       const gl = c.getContext('webgl2')
-      if (gl && this.initGl(gl)) this.mode = 'webgl2'
+      if (gl && this.initGl(gl)) {
+        this.mode = 'webgl2'
+        c.addEventListener?.('webglcontextlost', this.onLost)
+        c.addEventListener?.('webglcontextrestored', this.onRestored)
+      }
     } catch {
       /* weiter mit 2D */
     }
@@ -88,6 +103,8 @@ export class Field {
     if (this.raf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this.raf)
     this.raf = 0
     this.ro?.disconnect()
+    this.c.removeEventListener?.('webglcontextlost', this.onLost)
+    this.c.removeEventListener?.('webglcontextrestored', this.onRestored)
     this.parts = []
     this.streams = []
     try {
@@ -219,6 +236,7 @@ export class Field {
   }
 
   private draw(): void {
+    if (this.glLost) return // Kontext verloren: nichts zeichnen, bis er zurück ist
     const pts = this.points()
     if (this.gl && this.prog && this.buf) {
       const gl = this.gl
