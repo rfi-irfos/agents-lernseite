@@ -24,7 +24,15 @@ async function check(page: Page, label: string): Promise<void> {
       if (!el) { bad.push(`${s} fehlt`); continue }
       const r = el.getBoundingClientRect()
       if (r.left < -0.5 || r.top < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) bad.push(`${s} ragt aus dem Bild`)
-      if (s !== 'fx' && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) bad.push(`${s} läuft über (${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight}) ${el.className} ${el.innerHTML.slice(0, 200)}`)
+      // Die Chatblase im Eingabe-Slot ist absolut gesetzt und rückt bewusst nach oben (ergebnis.ts); sie wird unten gesondert geprüft.
+      if (s === 'buehne' || s === 'text') {
+        if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) bad.push(`${s} läuft über (${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight})`)
+      }
+    }
+    const blase = document.querySelector('.chatblase')?.getBoundingClientRect()
+    const steu = document.querySelector('[data-slot=steuerung]')!.getBoundingClientRect()
+    if (blase && (blase.left < -0.5 || blase.right > innerWidth + 0.5 || blase.top < -0.5 || blase.bottom > Math.min(innerHeight, steu.top) + 0.5)) {
+      bad.push(`Chatblase ragt hinaus (${Math.round(blase.top)}..${Math.round(blase.bottom)}, Steuerung ab ${Math.round(steu.top)})`)
     }
     return { sh: se.scrollHeight, sw: se.scrollWidth, ih: innerHeight, iw: innerWidth, bad }
   }, [...SLOTS])
