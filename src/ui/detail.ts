@@ -45,6 +45,7 @@ export function openDetail(station: StationScript, ctx: SceneCtx): Promise<void>
   const steuerung = app.querySelector<HTMLElement>('[data-slot=steuerung]')
   const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
   const reduced = ctx.reduced
+  ctx.sound.play('eintauchen')
   const sec = dur(reduced ? 0.2 : SECONDS)
 
   const layer = document.createElement('div')
@@ -100,6 +101,7 @@ export function openDetail(station: StationScript, ctx: SceneCtx): Promise<void>
     if (closing) return closing
     closing = (async () => {
       document.removeEventListener('keydown', onKey, true)
+      ctx.sound.play('auftauchen')
       window.removeEventListener('resize', place)
       await Promise.all([
         go(panel, { opacity: 0, y: reduced ? 0 : 24 }, sec),

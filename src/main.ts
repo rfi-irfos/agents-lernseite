@@ -26,7 +26,7 @@ import { markSeen, safeStore, seenScenarios } from './engine/store'
 import { mountRueckblick } from './scenes/rueckblick'
 import type { Player as PlayerT } from './engine/player'
 import type { StartResult } from './ui/start'
-import { dur, isTest, pushEvent, reducedMotion } from './env'
+import { dur, isTest, pushEvent, reducedMotion, spyAudio } from './env'
 import type { SceneCtx } from './scenes/types'
 import type { Format, Scenario, Tempo } from './engine/types'
 
@@ -52,6 +52,7 @@ canvas.setAttribute('aria-hidden', 'true')
 canvas.style.cssText = 'width:100%;height:100%;display:block'
 fxSlot.append(canvas)
 const field = new Field(canvas)
+spyAudio()
 const sound = new Sound()
 sound.on = safeStore.get('sound') === 'on'
 
