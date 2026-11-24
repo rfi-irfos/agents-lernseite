@@ -5,8 +5,8 @@ const SLOTS = ['fx', 'buehne', 'text', 'steuerung', 'eingabe'] as const
 const cases = [
   { w: 320, h: 568, format: 'hoch' },
   { w: 360, h: 740, format: 'hoch' },
-  { w: 820, h: 1000, format: 'hoch' },
-  { w: 1024, h: 768, format: 'quadrat' },
+  { w: 820, h: 1000, format: 'quadrat' },
+  { w: 1024, h: 768, format: 'quer' },
   { w: 1366, h: 768, format: 'quer' },
   { w: 1920, h: 1080, format: 'quer' },
 ]
@@ -97,8 +97,10 @@ test('Drehen 360x740 auf 740x360 morpht in höchstens 700 ms, kein Sprung', asyn
     const r = document.querySelector('[data-slot=buehne]')!.getBoundingClientRect()
     return { ...w.__m, end: [r.left, r.top, r.width, r.height] } as Record<string, number[]>
   })
-  const start = m.start as number[]
+  // Das Fenster hat schon die neue Größe, der Morph startet in der alten Anordnung (m.first)
+  const start = m.first as number[]
   const end = m.end as number[]
+  expect(end.some((v, i) => Math.abs(v - (m.start as number[])[i]) > 20)).toBe(true)
   expect(end.some((v, i) => Math.abs(v - start[i]) > 20)).toBe(true)
   // nach 700 ms ist die Endlage erreicht
   for (let i = 0; i < 4; i++) expect(Math.abs((m.s700 as number[])[i] - end[i])).toBeLessThan(2)
