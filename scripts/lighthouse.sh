@@ -15,3 +15,20 @@ for(const id of ["installable-manifest","service-worker","splash-screen","themed
 for(const [id,a] of Object.entries(r.audits)) if(a.score!==null&&a.score<1&&a.scoreDisplayMode!=="informative"&&a.scoreDisplayMode!=="notApplicable") console.log("FAIL",id,a.score,a.displayValue||"")
 for(const k of ["first-contentful-paint","largest-contentful-paint","total-blocking-time","cumulative-layout-shift","speed-index"])console.log(k,r.audits[k].displayValue)
 '
+# Lighthouse 12 hat keine PWA-Kategorie mehr: Installierbarkeit direkt von Chrome (CDP Page.getInstallabilityErrors)
+cat > test-out/lighthouse/installability.mjs <<'JS'
+import { chromium } from '@playwright/test'
+const b = await chromium.launch()
+const p = await b.newPage()
+const c = await p.context().newCDPSession(p)
+await c.send('Page.enable')
+await p.goto(process.argv[2])
+await p.waitForTimeout(3000)
+const r = await c.send('Page.getInstallabilityErrors')
+const m = await c.send('Page.getAppManifest')
+console.log('installability errors:', JSON.stringify(r.installabilityErrors), 'manifest errors:', JSON.stringify(m.errors))
+await b.close()
+JS
+cp test-out/lighthouse/installability.mjs ./installability.tmp.mjs
+node installability.tmp.mjs http://127.0.0.1:$PORT/ | tee test-out/lighthouse/installability.txt
+rm installability.tmp.mjs
