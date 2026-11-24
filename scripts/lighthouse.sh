@@ -1,11 +1,12 @@
 set -e
+PORT=$((4300 + $$ % 500)) # eigener Port: ältere Preview-Server können noch laufen
 npm ci >/dev/null 2>&1; npx playwright install chromium >/dev/null 2>&1; npm run build 2>&1 | tail -8
-(npx vite preview --host 127.0.0.1 --port 4174 --strictPort >/tmp/prev.log 2>&1 &)
-for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
-curl -sI http://127.0.0.1:4174/ | head -1
+(npx vite preview --host 127.0.0.1 --port $PORT --strictPort >/tmp/prev.log 2>&1 &)
+for i in $(seq 1 30); do curl -sf http://127.0.0.1:$PORT/ >/dev/null && break; sleep 1; done
+curl -sI http://127.0.0.1:$PORT/ | head -1
 mkdir -p test-out/lighthouse
 export CHROME_PATH=$(node -e 'import("@playwright/test").then(m=>console.log(m.chromium.executablePath()))')
-npx --yes lighthouse@12 http://127.0.0.1:4174/ --chrome-flags="--headless=new --no-sandbox" --output=json --output=html --output-path=test-out/lighthouse/report --quiet 2>&1 | tail -5
+npx --yes lighthouse@12 http://127.0.0.1:$PORT/ --chrome-flags="--headless=new --no-sandbox" --output=json --output=html --output-path=test-out/lighthouse/report --quiet 2>&1 | tail -5
 node -e '
 const r=JSON.parse(require("fs").readFileSync("test-out/lighthouse/report.report.json"));
 console.log(r.lighthouseVersion);
