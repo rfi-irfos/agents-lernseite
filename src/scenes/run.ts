@@ -12,6 +12,29 @@ import { mountWelt } from './welt'
 const MAX_DT = 100 // ms; nach Tab-Wechsel nicht aufholen
 const SAFETY_S = 3 // Notausgang, falls eine Szene den Text nie meldet
 
+/**
+ * Passt eine Szene in die Bühne ein: ist ihr Inhalt höher oder breiter als der Platz, wird die ganze Szene
+ * verkleinert. Die CSS-Eigenschaft scale bleibt neben den transform-Animationen von GSAP bestehen.
+ */
+function passeEin(stage: HTMLElement): void {
+  stage.style.scale = ''
+  const cs = getComputedStyle(stage)
+  const platzH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+  const platzB = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+  let oben = Infinity
+  let unten = -Infinity
+  let breit = 0
+  for (const k of Array.from(stage.children) as HTMLElement[]) {
+    if (getComputedStyle(k).position === 'absolute') continue
+    oben = Math.min(oben, k.offsetTop)
+    unten = Math.max(unten, k.offsetTop + Math.max(k.offsetHeight, k.scrollHeight))
+    breit = Math.max(breit, k.offsetWidth, k.scrollWidth)
+  }
+  if (unten <= oben || platzH <= 0 || platzB <= 0) return
+  const f = Math.min(1, platzH / (unten - oben), platzB / breit)
+  if (f < 0.995) stage.style.scale = String(Math.max(0.5, f))
+}
+
 interface Opts {
   app: HTMLElement
   player: Player
@@ -47,6 +70,7 @@ export function runScenes(o: Opts): () => void {
   let safety: gsap.core.Tween | undefined
   let first = true
   let einzug: gsap.core.Tween | null = null
+  let passung: (() => void) | null = null
   const welt = mountWelt(slot('fx'), slots.buehne, reducedMotion())
 
   /**
@@ -81,6 +105,8 @@ export function runScenes(o: Opts): () => void {
     const my = ++token
     tl?.kill()
     einzug?.kill()
+    passung?.()
+    passung = null
     const raus = abgang()
     slots.text.querySelectorAll('.erzaehl').forEach((n) => n.remove())
     slots.eingabe.querySelectorAll('.chatblase').forEach((n) => n.remove())
@@ -140,6 +166,18 @@ export function runScenes(o: Opts): () => void {
     tl = sceneFor(step.station, o.scenario.art)(ctx)
     // Einzug: die neue Szene wächst aus der Mitte heraus, sobald die alte weg ist.
     const neu = slots.buehne.querySelector<HTMLElement>(':scope > .stage')
+    if (neu) {
+      const fit = () => passeEin(neu)
+      fit()
+      const mo = new MutationObserver(fit)
+      mo.observe(neu, { childList: true, subtree: true })
+      const ro = new ResizeObserver(fit)
+      ro.observe(slots.buehne)
+      passung = () => {
+        mo.disconnect()
+        ro.disconnect()
+      }
+    }
     if (neu && raus > 0) {
       tl.delay(raus)
       const reduced = ctx.reduced
@@ -197,6 +235,7 @@ export function runScenes(o: Opts): () => void {
     safety?.kill()
     tl?.kill()
     einzug?.kill()
+    passung?.()
     welt.weg()
   }
 }

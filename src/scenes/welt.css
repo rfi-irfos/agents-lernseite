@@ -175,6 +175,8 @@
   height: auto;
   padding: calc(var(--s7) + var(--s2)) var(--s4) var(--s3);
   overflow: visible;
+  /* Mitte des Inhaltsfelds, damit eine eingepasste Szene unter dem Titel bleibt */
+  transform-origin: 50% calc(50% + (var(--s7) + var(--s2) - var(--s3)) / 2);
 }
 .stage-raus {
   box-sizing: border-box;
