@@ -5,6 +5,7 @@ import './theme/start.css'
 import './theme/controls.css'
 import './scenes/scenes.css'
 import './scenes/welt.css'
+import './scenes/karte.css'
 import './scenes/rueckblick/rueckblick.css'
 import { de } from './content/de'
 import { applyTheme, initialTheme, toggleTheme } from './theme/theme'
@@ -147,7 +148,7 @@ function launch(r: StartResult, tempo: Tempo, withDive: boolean): void {
         lesezeitMs: readingMs(scenario.ergebnis, player.tempo),
       })
     })
-    const stopScenes = runScenes({ app, player, field, scenario, eingabe, sound })
+    const stopScenes = runScenes({ app, player, steps, field, scenario, eingabe, sound })
     const stopProgress = mountProgress(slot('steuerung'), steps, player)
     const stopControls = mountControls(slot('steuerung'), player, sound, {
       onDetail: () => {

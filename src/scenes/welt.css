@@ -32,7 +32,7 @@
   max-width: none;
   border-color: transparent;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 #app[data-phase='play'] [data-slot='text'] {
@@ -110,60 +110,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.welt-titel {
-  position: absolute;
-  left: calc(2 * var(--s3));
-  top: calc(var(--s3) + var(--s2));
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-}
-.welt-kugelplatz {
-  flex: 0 0 auto;
-  width: var(--s4);
-  height: var(--s4);
-  display: grid;
-  place-items: center;
-}
-.welt-kugel {
-  display: block;
-  width: calc(2.2 * var(--s2));
-  height: calc(2.2 * var(--s2));
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffd9b8, var(--orb) 55%);
-  box-shadow:
-    0 0 var(--s3) var(--orb),
-    0 0 var(--s6) color-mix(in srgb, var(--orb) 60%, transparent);
-}
-.welt-schrift {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-.welt-klein {
-  font-size: clamp(11px, 1.6vmin, 15px);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  opacity: 0.85;
-}
-.welt-name {
-  font-size: clamp(20px, 4.2vmin, 44px);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.welt-name::after {
-  content: '';
-  display: block;
-  width: 2.2em;
-  height: 4px;
-  margin-top: var(--s1);
-  border-radius: 2px;
-  background: var(--cg);
-  box-shadow: 0 0 var(--s3) var(--cg);
 }
 
 /* Szenen liegen übereinander, damit die alte gehen und die neue kommen kann */

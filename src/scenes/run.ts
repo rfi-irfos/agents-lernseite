@@ -7,9 +7,12 @@ import { dur, isTest, pushEvent, reducedMotion } from '../env'
 import { AGENT_EVENT } from '../ui/quiz'
 import { sceneFor } from './registry'
 import type { SceneCtx } from './types'
+import { mountKarte } from './karte'
 import { mountWelt } from './welt'
+import type { Step } from '../engine/steps'
 
 const MAX_DT = 100 // ms; nach Tab-Wechsel nicht aufholen
+const FLUG_S = 1.2 // Kamerafahrt vor der Szene
 const SAFETY_S = 3 // Notausgang, falls eine Szene den Text nie meldet
 
 /**
@@ -46,6 +49,7 @@ function passeEin(stage: HTMLElement): void {
 interface Opts {
   app: HTMLElement
   player: Player
+  steps: Step[]
   field: Field
   scenario: Scenario
   eingabe: string
@@ -79,57 +83,40 @@ export function runScenes(o: Opts): () => void {
   let first = true
   let einzug: gsap.core.Tween | null = null
   let passung: (() => void) | null = null
-  const welt = mountWelt(slot('fx'), slots.buehne, reducedMotion())
-
-  /**
-   * Stationswechsel ohne harten Schnitt: die alte Szene zieht sich zur Mitte zurück und blendet aus,
-   * die Welt dahinter bleibt stehen. Gibt die Dauer des Abgangs zurück.
-   */
-  const abgang = (): number => {
-    const reduced = reducedMotion()
-    const raus = dur(reduced ? 0.1 : 0.32)
-    for (const ch of Array.from(slots.buehne.children) as HTMLElement[]) {
-      if (ch.classList.contains('stage-raus')) continue
-      if (!ch.classList.contains('stage') || raus === 0) {
-        ch.remove()
-        continue
-      }
-      ch.classList.replace('stage', 'stage-raus')
-      ch.inert = true
-      ch.setAttribute('aria-hidden', 'true')
-      gsap.killTweensOf(ch)
-      gsap.to(ch, {
-        ...(reduced ? {} : { scale: 0.86, filter: 'blur(6px)' }),
-        opacity: 0,
-        duration: raus,
-        ease: 'power2.in',
-        onComplete: () => ch.remove(),
-      })
-    }
-    return raus
-  }
+  const welt = mountWelt(slot('fx'))
+  const karte = mountKarte(slots.buehne, {
+    steps: o.steps,
+    reduced: reducedMotion(),
+    onWahl: (i) => player.goTo(i),
+  })
+  // Wer die Steuerung benutzt, will dem Ablauf wieder folgen.
+  const folge = () => karte.folge()
+  slot('steuerung').addEventListener('click', folge, true)
 
   const enter = () => {
     const my = ++token
-    tl?.kill()
-    einzug?.kill()
+    // Die alte Szene bleibt als fertiges Bild in ihrem Knoten stehen.
+    tl?.progress(1, true).kill()
+    einzug?.progress(1).kill()
     passung?.()
     passung = null
-    const raus = abgang()
     slots.text.querySelectorAll('.erzaehl').forEach((n) => n.remove())
     slots.eingabe.querySelectorAll('.chatblase').forEach((n) => n.remove())
     holding = false
     calls.forEach((c) => c.kill())
     calls = []
     const step = player.step
+    const index = player.index
+    const flaeche = karte.buehne(index)
     // Ein Klang je Stationswechsel: der Schleifenstart meldet sich mit „hinweis“, sonst „wisch“; die erste Station nach dem Eintauchen bleibt still.
     if (!first) o.sound.play(step.loopStart ? 'hinweis' : 'wisch')
-    welt.zeige(step, player.index, player.total, first)
+    if (first) welt.zeige()
+    const erster = first
     first = false
     app.dataset.station = step.station
     app.style.setProperty('--c', `var(--c-${step.station})`)
     const ctx: SceneCtx = {
-      slots,
+      slots: { ...slots, buehne: flaeche },
       field: o.field,
       step,
       scenario: o.scenario,
@@ -168,58 +155,55 @@ export function runScenes(o: Opts): () => void {
     }
     player.beginTransition() // Text zuerst: die Lesezeit zählt erst, wenn der Text steht
     safety?.kill()
-    safety = gsap.delayedCall(SAFETY_S, () => {
+    safety = gsap.delayedCall(SAFETY_S + FLUG_S, () => {
       if (my === token) player.endTransition()
     })
-    tl = sceneFor(step.station, o.scenario.art)(ctx)
-    // Einzug: die neue Szene wächst aus der Mitte heraus, sobald die alte weg ist.
-    const neu = slots.buehne.querySelector<HTMLElement>(':scope > .stage')
-    if (neu) {
-      const fit = () => passeEin(neu)
-      fit()
-      const mo = new MutationObserver(fit)
-      mo.observe(neu, { childList: true, subtree: true })
-      const ro = new ResizeObserver(fit)
-      ro.observe(slots.buehne)
-      passung = () => {
-        mo.disconnect()
-        ro.disconnect()
-      }
-    }
-    if (neu && raus > 0) {
-      tl.delay(raus)
-      const reduced = ctx.reduced
-      einzug = gsap.fromTo(
-        neu,
-        reduced ? { opacity: 0 } : { opacity: 0, scale: 0.9 },
-        {
-          opacity: 1,
-          ...(reduced ? {} : { scale: 1 }),
-          duration: dur(reduced ? 0.15 : 0.55),
-          delay: raus,
-          ease: 'power3.out',
-          clearProps: 'transform,opacity',
-        },
-      )
-    }
-    // Meldet das Ende der Szene (für Tests und das Kontaktblatt): data-szene=fertig, Ereignis szene-fertig.
     app.dataset.szene = 'laeuft'
-    const fertig = () => {
+    // Erst fliegt die Kamera zum Knoten, dann beginnt dort die Szene.
+    karte.zeige(index, erster, () => {
       if (my !== token) return
-      app.dataset.szene = 'fertig'
-      pushEvent({ type: 'szene-fertig', index: player.index })
-    }
-    if (tl.totalDuration() === 0 || tl.progress() === 1) fertig()
-    else tl.eventCallback('onComplete', fertig)
+      flaeche.replaceChildren()
+      const szene = sceneFor(step.station, o.scenario.art)(ctx)
+      tl = szene
+      const neu = flaeche.querySelector<HTMLElement>(':scope > .stage')
+      if (neu) {
+        const fit = () => passeEin(neu)
+        fit()
+        const mo = new MutationObserver(fit)
+        mo.observe(neu, { childList: true, subtree: true })
+        const ro = new ResizeObserver(fit)
+        ro.observe(flaeche)
+        passung = () => {
+          mo.disconnect()
+          ro.disconnect()
+        }
+        const reduced = ctx.reduced
+        const t = dur(reduced ? 0.15 : 0.5)
+        if (t > 0) {
+          einzug = gsap.fromTo(
+            neu,
+            reduced ? { opacity: 0 } : { opacity: 0, scale: 0.94 },
+            { opacity: 1, ...(reduced ? {} : { scale: 1 }), duration: t, ease: 'power3.out', clearProps: 'transform,opacity' },
+          )
+        }
+      }
+      // Meldet das Ende der Szene (für Tests und das Kontaktblatt): data-szene=fertig, Ereignis szene-fertig.
+      const fertig = () => {
+        if (my !== token) return
+        app.dataset.szene = 'fertig'
+        pushEvent({ type: 'szene-fertig', index })
+      }
+      if (szene.totalDuration() === 0 || szene.progress() === 1) fertig()
+      else szene.eventCallback('onComplete', fertig)
+    })
   }
 
   const offStep = player.on('step', enter)
-  const offDone = player.on('done', () => welt.ruhe())
 
   // Nach 8 s im Auto-Modus meldet der Player den Zeitablauf; die Oberfläche zeigt die Wahl des Agenten.
   const offTimeout = player.on('quizTimeout', () => {
     if (holding) return
-    const quiz = slots.buehne.querySelector(':scope > .stage .quiz')
+    const quiz = karte.buehne(player.index).querySelector(':scope > .stage .quiz')
     if (quiz) {
       holding = true
       quiz.dispatchEvent(new CustomEvent(AGENT_EVENT))
@@ -236,7 +220,6 @@ export function runScenes(o: Opts): () => void {
   return () => {
     token++ // verspätete Rückrufe (Notausgang, Quiz) verfallen
     offStep()
-    offDone()
     offTimeout()
     calls.forEach((c) => c.kill())
     if (auto) gsap.ticker.remove(tick)
@@ -244,6 +227,8 @@ export function runScenes(o: Opts): () => void {
     tl?.kill()
     einzug?.kill()
     passung?.()
+    slot('steuerung').removeEventListener('click', folge, true)
+    karte.weg()
     welt.weg()
   }
 }

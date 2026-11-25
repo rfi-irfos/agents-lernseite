@@ -1,0 +1,280 @@
+/* Der Ablauf als Karte: Knoten mit Erklärbild, Leitungen dazwischen, frei zoom- und ziehbar. */
+.karte {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.karte.zieht {
+  cursor: grabbing;
+}
+.karte-welt {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Leitungen */
+.karte-linien {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+.kante {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2 12;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 600ms ease;
+}
+.kante.an {
+  stroke: color-mix(in srgb, var(--c) 70%, var(--ink));
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 6px var(--c));
+}
+.karte-kugel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffd9b8, var(--orb) 55%);
+  box-shadow:
+    0 0 18px var(--orb),
+    0 0 48px color-mix(in srgb, var(--orb) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Knoten */
+.knoten {
+  --cx: var(--c);
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: var(--kw);
+  height: var(--kh);
+  border: 1.5px solid color-mix(in srgb, var(--cx) 26%, transparent);
+  border-radius: calc(2 * var(--radius));
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, color-mix(in srgb, var(--c) 14%, transparent), transparent 75%),
+    color-mix(in srgb, var(--card) 55%, transparent);
+  cursor: pointer;
+  transition:
+    border-color 600ms ease,
+    box-shadow 600ms ease,
+    opacity 600ms ease;
+}
+:root[data-theme='dark'] .knoten {
+  --cx: color-mix(in srgb, var(--c) 58%, white);
+}
+.knoten:not(.besucht) {
+  opacity: 0.6;
+}
+.knoten.aktiv {
+  cursor: inherit;
+  border-color: color-mix(in srgb, var(--cx) 60%, transparent);
+  box-shadow:
+    0 0 var(--s6) color-mix(in srgb, var(--c) 30%, transparent),
+    inset 0 0 var(--s7) color-mix(in srgb, var(--c) 10%, transparent);
+}
+.knoten:not(.aktiv):hover {
+  border-color: var(--cx);
+}
+.knoten-buehne {
+  position: absolute;
+  inset: 0;
+}
+.knoten:not(.aktiv) .knoten-buehne {
+  pointer-events: none;
+}
+
+.knoten-kopf {
+  position: absolute;
+  left: var(--s4);
+  top: var(--s3);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  cursor: grab;
+  transform-origin: 0 0;
+  transition: transform 500ms ease;
+}
+.knoten-nr {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: var(--c);
+  color: #fff;
+  font-size: clamp(13px, 2.2vmin, 22px);
+  font-weight: 800;
+  box-shadow: 0 0 var(--s4) color-mix(in srgb, var(--cx) 60%, transparent);
+}
+.knoten-schrift {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.knoten-klein {
+  font-size: clamp(11px, 1.6vmin, 15px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  opacity: 0.85;
+}
+.knoten-name {
+  font-size: clamp(20px, 3.8vmin, 40px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* Noch nicht besucht: nur der Name, groß in der Mitte */
+.knoten-ruhe {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--kh) * 0.14);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--cx) 70%, var(--ink));
+  opacity: 0.55;
+  transition: opacity 500ms ease;
+}
+.knoten.besucht .knoten-ruhe {
+  opacity: 0;
+}
+
+/* Der Satz der Station steht unter ihrem Knoten, sobald man herauszoomt */
+.knoten-satz {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin: var(--s4) 0 0;
+  text-align: center;
+  text-wrap: balance;
+  font-size: calc(var(--kh) * 0.062);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 500ms ease;
+  pointer-events: none;
+}
+.karte[data-sicht='weit'] .knoten.besucht .knoten-satz {
+  opacity: 1;
+}
+.karte[data-sicht='weit'] .knoten-kopf {
+  transform: scale(2.1);
+}
+/* Herausgezoomt übernimmt die Karte das Erzählen; der Untertitel tritt zurück */
+.erzaehl {
+  transition: opacity 400ms ease;
+}
+#app:has(.karte[data-sicht='weit']) .erzaehl {
+  opacity: 0;
+}
+
+/* Zoom-Leiste oben rechts, daneben Ton und Hell/Dunkel */
+.karte-leiste {
+  position: absolute;
+  top: 0;
+  right: calc(2 * var(--ctl) + 2 * var(--s1) + var(--s3));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  cursor: default;
+}
+.karte-knopf {
+  min-width: calc(var(--ctl) - 6px);
+  height: calc(var(--ctl) - 6px);
+  padding: 0;
+  border-color: transparent;
+  border-radius: 999px;
+  background: none;
+  box-shadow: none;
+}
+.karte-prozent {
+  min-width: 3.4em;
+  text-align: center;
+  font-size: clamp(12px, 1.8vmin, 16px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+#app[data-phase='play'] .controls-aux {
+  position: fixed;
+  top: var(--s3);
+  right: var(--s3);
+  z-index: 3;
+}
+@media (max-width: 560px) {
+  .karte-leiste [data-karte='kleiner'],
+  .karte-leiste [data-karte='groesser'],
+  .karte-prozent {
+    display: none;
+  }
+}
+
+/* Fortschritt: schmale, ruhige Spur statt bunter Punkte */
+#app[data-phase='play'] .progress {
+  width: min(100%, 30em);
+}
+#app[data-phase='play'] .progress-dot {
+  height: var(--s3);
+}
+#app[data-phase='play'] .progress-dot .dot {
+  width: 6px;
+  height: 6px;
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
+  box-shadow: none;
+}
+#app[data-phase='play'] .progress-dot[data-state='done'] .dot {
+  background: color-mix(in srgb, var(--ink) 75%, transparent);
+}
+#app[data-phase='play'] .progress-dot[data-state='now'] .dot {
+  width: 10px;
+  height: 10px;
+  background: var(--dc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dc) 30%, transparent);
+}
+#app[data-phase='play'] .progress-dot + .progress-dot::before {
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knoten,
+  .knoten-kopf,
+  .knoten-ruhe,
+  .knoten-satz,
+  .kante,
+  .erzaehl {
+    transition-duration: 150ms;
+  }
+  .karte[data-sicht='weit'] .knoten-kopf {
+    transform: none;
+  }
+}

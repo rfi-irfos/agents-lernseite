@@ -15,6 +15,13 @@ export const de = {
     nochmal: 'Nochmal',
     naechster: 'Nächster Ablauf',
   },
+  karte: {
+    label: 'Karte',
+    kleiner: 'Kleiner',
+    groesser: 'Größer',
+    alles: 'Alles zeigen',
+    station: 'Zur Station',
+  },
   fortschritt: {
     label: 'Fortschritt',
     schritt: 'Schritt',
