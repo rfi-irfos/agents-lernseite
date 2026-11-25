@@ -40,7 +40,7 @@ test('Handeln code: Terminal tippt, Testlauf ist im ersten Durchlauf rot, im zwe
   await expect(page.locator('.testlauf')).toHaveAttribute('data-status', 'rot')
   await expect(page.locator('.testlauf')).toContainText('fehlgeschlagen')
   await goTo(page, 10) // handeln, zweiter Durchlauf
-  await expect(page.locator('.terminal')).toContainText('sorted(liste)')
+  await expect(page.locator('.knoten.aktiv .terminal')).toContainText('sorted(liste)')
   await expect(page.locator('.testlauf')).toHaveAttribute('data-status', 'gruen')
   await expect(page.locator('.testlauf')).toContainText('bestanden')
 })
@@ -81,7 +81,7 @@ test('Handeln planung: Routenpunkte mit Ort und Zeit', async ({ page }) => {
 test('Prüfen ohne Schleife: Haken, kein Rückflug', async ({ page }) => {
   await startAt(page, { eingabe: 'zzsuche', at: 6 })
   await expect(page.locator('.haken')).toBeVisible()
-  await expect(page.locator('.schleifengrund')).toHaveCount(0)
+  await expect(page.locator('.knoten.aktiv .schleifengrund')).toHaveCount(0)
   await expect(page.locator('.orb-rueck')).toHaveCount(0)
 })
 
@@ -111,7 +111,7 @@ test('Prüfen mit Schleife: Grund steht da, Kugel fliegt zurück zu Denken, dann
     .toBe(true)
   await goTo(page, 11) // Prüfen im zweiten Durchlauf bestätigt
   await expect(page.locator('.haken')).toBeVisible()
-  await expect(page.locator('.schleifengrund')).toHaveCount(0)
+  await expect(page.locator('.knoten.aktiv .schleifengrund')).toHaveCount(0)
 })
 
 test('step-Ereignis trägt pass', async ({ page }) => {

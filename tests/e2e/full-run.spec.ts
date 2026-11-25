@@ -35,9 +35,10 @@ async function check(page: Page, label: string, station: string): Promise<void> 
           if (q.left < r.left - 1 || q.right > r.right + 1 || q.top < r.top - 1 || q.bottom > r.bottom + 1) bad.push(`eingabe-Inhalt ragt aus dem Slot: ${c.tagName}.${c.className}`)
         }
       }
-      if (s === 'buehne' || s === 'text') {
-        if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) bad.push(`${s} läuft über (${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight})`)
-      }
+      // Die Bühne trägt die ganze Karte; geprüft wird die Fläche des aktiven Knotens, in der die Szene steht.
+      const box = s === 'buehne' ? document.querySelector<HTMLElement>('.knoten.aktiv .knoten-buehne') : s === 'text' ? el : null
+      if (s === 'buehne' && !box) bad.push('aktiver Knoten fehlt')
+      if (box && (box.scrollWidth > box.clientWidth + 1 || box.scrollHeight > box.clientHeight + 1)) bad.push(`${s} läuft über (${box.scrollWidth}x${box.scrollHeight} in ${box.clientWidth}x${box.clientHeight})`)
     }
     const blaseEl = document.querySelector<HTMLElement>('.chatblase')
     if (station === 'ergebnis') {

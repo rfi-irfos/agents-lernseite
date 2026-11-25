@@ -31,7 +31,7 @@ test('Wahrnehmung: 500 Zeichen ergeben 9 Karten ohne Überlauf', async ({ page }
   await startAt(page, { eingabe: 'aaaa '.repeat(100).trim(), at: 1 })
   await expect(page.locator('.wortkarte')).toHaveCount(9)
   const over = await page.evaluate(() => {
-    const b = document.querySelector('[data-slot=buehne]') as HTMLElement
+    const b = document.querySelector('.knoten.aktiv .knoten-buehne') as HTMLElement
     const r = b.getBoundingClientRect()
     const bad = [...document.querySelectorAll<HTMLElement>('.wortkarte')].filter((c) => {
       const q = c.getBoundingClientRect()
