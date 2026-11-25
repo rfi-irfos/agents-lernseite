@@ -533,3 +533,31 @@
     transform: none;
   }
 }
+
+/* Vier Planschritte: schmalere Karten, damit sie in einer Reihe bleiben */
+.plan:has(.plankarte:nth-child(4)) {
+  gap: var(--s3);
+}
+.plan:has(.plankarte:nth-child(4)) .plankarte {
+  flex-basis: 9ch;
+  gap: var(--s2);
+  padding: var(--s3) var(--s2);
+}
+
+/* Kleines Handy: das Quiz rückt zusammen, damit Frage und drei Karten in die Bühne passen */
+@media (max-width: 420px) and (max-height: 620px) {
+  .quiz,
+  .quiz-karten {
+    gap: var(--s2);
+  }
+  .quiz-frage {
+    font-size: 15px;
+  }
+  .stage .quizkarte {
+    gap: var(--s1);
+    padding: var(--s2);
+  }
+  .quizkarte .werkzeug-bild {
+    width: 28px;
+  }
+}
