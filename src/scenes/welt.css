@@ -560,4 +560,22 @@
   .quizkarte .werkzeug-bild {
     width: 28px;
   }
+  .plan,
+  .plan:has(.plankarte:nth-child(4)) {
+    flex-flow: column nowrap;
+    gap: var(--s2);
+  }
+  .plan .plankarte,
+  .plan:has(.plankarte:nth-child(4)) .plankarte {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--s2);
+    padding: var(--s1) var(--s2);
+  }
+  .plan-nr {
+    flex: none;
+    width: 1.8em;
+    height: 1.8em;
+  }
 }
