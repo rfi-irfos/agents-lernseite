@@ -33,6 +33,7 @@ export class Player {
   get state(): PlayerState { return this._state }
   get index(): number { return this._index }
   get step(): Step { return this.steps[this._index] }
+  get total(): number { return this.steps.length }
   get tempo(): Tempo { return this._tempo }
   /** Pause gilt, auch wenn sie im Übergang erst gemerkt ist. */
   get paused(): boolean { return this._state === 'paused' || (this._state === 'transition' && this.pauseIntent === true) }

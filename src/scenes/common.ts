@@ -1,4 +1,5 @@
 import { gsap } from 'gsap'
+import { de } from '../content/de'
 import { dur } from '../env'
 import type { SceneCtx } from './types'
 
@@ -75,22 +76,49 @@ export function startScene(ctx: SceneCtx): { tl: gsap.core.Timeline; stage: HTML
   return { tl, stage, satz }
 }
 
-/** Kleiner Kugel-Hüpfer für kurze Stationen. */
+const NS = 'http://www.w3.org/2000/svg'
+
+/**
+ * Kurze Stationen: ein Ring in der Stationsfarbe zeichnet sich, der Name steht in der Mitte,
+ * und die Daten-Kugel läuft einmal um den Ring.
+ */
 export function orbHop(ctx: SceneCtx, stage: HTMLElement, tl: gsap.core.Timeline): void {
+  const wrap = el('div', 'emblem')
+  const svg = document.createElementNS(NS, 'svg')
+  svg.setAttribute('viewBox', '0 0 200 200')
+  svg.setAttribute('aria-hidden', 'true')
+  const spur = document.createElementNS(NS, 'circle')
+  const ring = document.createElementNS(NS, 'circle')
+  for (const [c, cls] of [[spur, 'emblem-spur'], [ring, 'emblem-ring']] as const) {
+    c.setAttribute('cx', '100')
+    c.setAttribute('cy', '100')
+    c.setAttribute('r', '88')
+    c.setAttribute('class', cls)
+    svg.append(c)
+  }
+  const name = el('span', 'emblem-name')
+  name.textContent = de.stationNamen[ctx.step.station]
+  const bahn = el('div', 'emblem-bahn')
   const orb = el('div', 'orb orb-hop')
   orb.setAttribute('aria-hidden', 'true')
-  stage.append(orb)
+  bahn.append(orb)
+  wrap.append(svg, name, bahn)
+  stage.append(wrap)
+
+  const len = 2 * Math.PI * 88
   if (ctx.reduced) {
-    // nur ein Aufleuchten an Ort und Stelle
-    gsap.set(orb, { opacity: 0 })
-    tl.to(orb, { opacity: 1, duration: d(ctx, 0.2) }, 'handlung')
-    tl.to(orb, { opacity: 0, duration: d(ctx, 0.2) })
+    gsap.set([ring, name, orb], { opacity: 0 })
+    tl.to([ring, name], { opacity: 1, duration: d(ctx, 0.2) }, 'handlung')
+    tl.to(orb, { opacity: 1, duration: d(ctx, 0.2) })
     return
   }
-  tl.fromTo(orb, { opacity: 0, x: '-4em', y: 0 }, { opacity: 1, x: '0em', duration: d(ctx, 0.4) }, 'handlung')
-  tl.to(orb, { y: '-1.2em', duration: d(ctx, 0.25), ease: 'power2.out' })
-  tl.to(orb, { y: '0em', duration: d(ctx, 0.25), ease: 'power2.in' })
-  tl.to(orb, { x: '4em', opacity: 0, duration: d(ctx, 0.4) })
+  gsap.set(ring, { strokeDasharray: len, strokeDashoffset: len })
+  gsap.set(name, { opacity: 0 })
+  gsap.set(orb, { opacity: 0 })
+  tl.to(ring, { strokeDashoffset: 0, duration: d(ctx, 0.9) }, 'handlung')
+  tl.fromTo(name, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: d(ctx, 0.5), clearProps: 'transform' }, `handlung+=${d(ctx, 0.3)}`)
+  tl.to(orb, { opacity: 1, duration: d(ctx, 0.2) }, 'handlung')
+  tl.fromTo(bahn, { rotation: 0 }, { rotation: 360, duration: d(ctx, 1.4), ease: 'power1.inOut', clearProps: 'transform' }, 'handlung')
 }
 
 /** Datenstrom vom Rand eines Elements zum Rand eines anderen, in CSS-Pixeln der Bühne (#app). */

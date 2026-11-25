@@ -1,0 +1,530 @@
+/* Der Ablauf als eine Fahrt: Bühne über das ganze Bild, Welt dahinter, Erzählsatz als Untertitel. */
+@property --cg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+#app {
+  --cg: var(--c, var(--focus));
+  transition: --cg 900ms ease;
+}
+
+/* Helle Fassung der Stationsfarbe für Linien und Schein auf dunklem Grund */
+:root {
+  --cx: var(--c, var(--focus));
+}
+:root[data-theme='dark'] #app {
+  --cx: color-mix(in srgb, var(--c, var(--focus)) 58%, white);
+}
+
+#app[data-phase='play'][data-format] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  grid-template-areas:
+    'buehne'
+    'eingabe'
+    'text'
+    'steuerung';
+}
+
+#app[data-phase='play'] [data-slot='buehne'] {
+  max-width: none;
+  border-color: transparent;
+  background: transparent;
+  overflow: visible;
+}
+
+#app[data-phase='play'] [data-slot='text'] {
+  justify-self: center;
+  width: min(100%, 62rem);
+  min-height: calc(3 * 1.35 * clamp(17px, 3vmin, 32px));
+  border-color: transparent;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#app[data-phase='play'] [data-slot='eingabe'] {
+  justify-self: center;
+  width: min(100%, 46rem);
+  min-height: 0;
+}
+
+.erzaehl {
+  padding: 0 var(--s3);
+  text-align: center;
+  font-size: clamp(17px, 3vmin, 32px);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+/* Die Welt */
+.welt {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.welt-schein {
+  position: absolute;
+  inset: -18% -10%;
+  background:
+    radial-gradient(ellipse 46% 52% at 50% 50%, color-mix(in srgb, var(--cg) 34%, transparent), transparent 72%),
+    radial-gradient(ellipse 30% 26% at 18% 82%, color-mix(in srgb, var(--cg) 16%, transparent), transparent 70%),
+    radial-gradient(ellipse 28% 24% at 84% 14%, color-mix(in srgb, var(--cg) 14%, transparent), transparent 70%);
+}
+.welt-ringe {
+  grid-area: 1 / 1;
+  height: 150%;
+  max-width: none;
+  aspect-ratio: 1;
+  overflow: visible;
+}
+.welt-ringe circle {
+  fill: none;
+  stroke: var(--cg);
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  opacity: 0.4;
+}
+.welt-ringe g {
+  transform-origin: 100px 100px;
+  animation: welt-dreh 80s linear infinite;
+}
+.welt-ringe .ring-b {
+  animation-duration: 120s;
+  animation-direction: reverse;
+}
+.welt-ringe .ring-c {
+  animation-duration: 200s;
+}
+@keyframes welt-dreh {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.welt-titel {
+  position: absolute;
+  left: var(--s3);
+  top: var(--s2);
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+.welt-kugelplatz {
+  flex: 0 0 auto;
+  width: var(--s4);
+  height: var(--s4);
+  display: grid;
+  place-items: center;
+}
+.welt-kugel {
+  display: block;
+  width: calc(2.2 * var(--s2));
+  height: calc(2.2 * var(--s2));
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffd9b8, var(--orb) 55%);
+  box-shadow:
+    0 0 var(--s3) var(--orb),
+    0 0 var(--s6) color-mix(in srgb, var(--orb) 60%, transparent);
+}
+.welt-schrift {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.welt-klein {
+  font-size: clamp(11px, 1.6vmin, 15px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  opacity: 0.85;
+}
+.welt-name {
+  font-size: clamp(20px, 4.2vmin, 44px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.welt-name::after {
+  content: '';
+  display: block;
+  width: 2.2em;
+  height: 4px;
+  margin-top: var(--s1);
+  border-radius: 2px;
+  background: var(--cg);
+  box-shadow: 0 0 var(--s3) var(--cg);
+}
+
+/* Szenen liegen übereinander, damit die alte gehen und die neue kommen kann */
+.stage,
+.stage-raus {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  padding: calc(var(--s7) + var(--s2)) var(--s4) var(--s3);
+  overflow: visible;
+}
+.stage-raus {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  pointer-events: none;
+}
+:where(.stage, .stage-raus) > * {
+  max-width: min(100%, 64rem);
+}
+
+/* Tafeln: getönt in der Stationsfarbe, mit Schein statt grauem Rand */
+.wortkarte,
+.plankarte,
+.treffer,
+.anfragekarte,
+.antwortkarte,
+.terminal,
+.testlauf,
+.routenpunkt,
+.pruef-aufgabe,
+.notiz,
+.markierung-text,
+.ziel-denken,
+.eing-frage,
+.stage .quizkarte {
+  border: 1.5px solid color-mix(in srgb, var(--cx) 60%, transparent);
+  border-radius: calc(var(--radius) * 1.3);
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--c) 30%, var(--card)),
+    color-mix(in srgb, var(--c) 9%, var(--card))
+  );
+  box-shadow:
+    0 var(--s2) var(--s5) color-mix(in srgb, var(--c) 30%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.14);
+  color: var(--ink);
+}
+
+.wortkarte,
+.plankarte,
+.treffer,
+.anfragekarte,
+.antwortkarte,
+.testlauf,
+.routenpunkt,
+.pruef-aufgabe,
+.stage .quizkarte {
+  font-size: clamp(15px, 2.8vmin, 28px);
+}
+
+.wn-satz {
+  font-size: clamp(16px, 2.8vmin, 30px);
+  font-weight: 600;
+}
+.wortkarte {
+  padding: var(--s2) var(--s4);
+  border-radius: 999px;
+  font-weight: 600;
+}
+.wortkarte.wichtig {
+  border-color: var(--cx);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--c) 62%, var(--card)), color-mix(in srgb, var(--c) 30%, var(--card)));
+  box-shadow:
+    0 0 var(--s4) color-mix(in srgb, var(--cx) 70%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
+
+/* Linienzeichnungen leuchten in der Stationsfarbe */
+.g-base {
+  fill: color-mix(in srgb, var(--c) 20%, var(--card));
+  stroke: var(--cx);
+  stroke-opacity: 0.9;
+}
+.g-acc {
+  stroke: var(--cx);
+}
+.g-acc-fill {
+  fill: var(--cx);
+}
+.gedankenwolke svg,
+.werkzeug-bild svg,
+.pruef-urteil svg,
+.fertig-haken svg,
+.schublade svg {
+  filter: drop-shadow(0 0 var(--s3) color-mix(in srgb, var(--cx) 55%, transparent));
+}
+.gedankenwolke .weg {
+  stroke: var(--cx);
+  stroke-opacity: 0.5;
+  stroke-width: 3.5;
+}
+.gedankenwolke .weg.gewaehlt {
+  stroke: var(--cx);
+  stroke-width: 7;
+}
+.gedankenwolke .ende {
+  fill: color-mix(in srgb, var(--c) 20%, var(--card));
+  stroke: var(--cx);
+  stroke-opacity: 0.8;
+}
+.gedankenwolke .ende.gewaehlt {
+  fill: var(--cx);
+  stroke: var(--cx);
+}
+.schublade,
+.notiz {
+  --cx: color-mix(in srgb, var(--c-gedaechtnis) 62%, white);
+}
+
+/* Planung: Schritte als Reihe mit gefüllten Nummern */
+.plan {
+  gap: var(--s4);
+  align-items: stretch;
+}
+.plankarte {
+  flex: 1 1 14ch;
+  gap: var(--s3);
+  padding: var(--s4) var(--s3);
+  font-weight: 600;
+}
+.plan-nr {
+  width: 2.2em;
+  height: 2.2em;
+  border: 0;
+  background: var(--c);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 var(--s4) color-mix(in srgb, var(--cx) 70%, transparent);
+}
+
+.quiz-frage {
+  font-size: clamp(17px, 3vmin, 32px);
+  font-weight: 700;
+  text-wrap: balance;
+}
+.stage .quizkarte {
+  padding: var(--s4) var(--s3);
+  font-weight: 600;
+}
+.stage .quizkarte:hover:not([aria-disabled='true']) {
+  border-color: var(--cx);
+  transform: translateY(calc(-1 * var(--s1)));
+}
+.quizkarte .werkzeug-bild {
+  width: clamp(48px, 15vmin, 128px);
+}
+.quizkarte[data-state='richtig'],
+.quizkarte[data-agent='true'] {
+  border-color: var(--cx);
+  box-shadow: 0 0 var(--s6) color-mix(in srgb, var(--cx) 65%, transparent);
+}
+
+.terminal,
+.bildrahmen {
+  border-color: color-mix(in srgb, var(--cx) 70%, transparent);
+  box-shadow: 0 var(--s2) var(--s6) color-mix(in srgb, var(--c) 40%, transparent);
+}
+.terminal-kopf {
+  border-bottom: 1.5px solid color-mix(in srgb, var(--cx) 35%, transparent);
+  background: color-mix(in srgb, var(--c) 22%, transparent);
+}
+.abtastlinie {
+  background: var(--cx);
+  box-shadow: 0 0 var(--s4) var(--cx);
+}
+.markierung-ring {
+  border-color: var(--cx);
+}
+.routenpunkt-marke {
+  background: var(--cx);
+  box-shadow: 0 0 var(--s3) var(--cx);
+}
+.fertig {
+  font-size: clamp(22px, 4.6vmin, 48px);
+  font-weight: 800;
+}
+.schleifengrund {
+  font-weight: 600;
+}
+
+/* Antwort des Agenten: eine Chat-Blase über dem Untertitel */
+.chatblase {
+  position: relative;
+  min-height: 0;
+  margin-bottom: var(--s2);
+  padding: var(--s3) var(--s4);
+  border: 1.5px solid color-mix(in srgb, var(--cx) 70%, transparent);
+  border-radius: calc(var(--radius) * 1.4);
+  border-top-left-radius: var(--s1);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--c) 30%, var(--card)), color-mix(in srgb, var(--c) 10%, var(--card)));
+  box-shadow: 0 var(--s2) var(--s6) color-mix(in srgb, var(--c) 40%, transparent);
+}
+.chat-text {
+  font-size: clamp(15px, 2.4vmin, 24px);
+}
+
+/* Eingabe: Frage reist zum Agenten */
+.eing {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.eing-frage {
+  box-sizing: border-box;
+  margin: 0;
+  max-width: min(100%, 34em);
+  padding: var(--s3) var(--s4);
+  border-bottom-right-radius: var(--s1);
+  font-size: clamp(16px, 3vmin, 32px);
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+.eing-leitung {
+  position: relative;
+  flex: 0 1 var(--s7);
+  min-height: var(--s5);
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--cx) 20%, transparent), var(--cx));
+}
+.eing-orb {
+  left: 50%;
+  top: 0;
+}
+.eing-agent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2);
+  color: var(--ink);
+  font-size: clamp(14px, 2.4vmin, 24px);
+  font-weight: 700;
+}
+.eing-kern {
+  display: block;
+  width: clamp(48px, 13vmin, 112px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--cx);
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--c) 55%, var(--card)), color-mix(in srgb, var(--c) 12%, var(--card)) 70%);
+  box-shadow: 0 0 var(--s5) color-mix(in srgb, var(--cx) 40%, transparent);
+  transition: box-shadow 500ms ease;
+}
+.eing-agent.an .eing-kern {
+  box-shadow:
+    0 0 var(--s7) var(--cx),
+    inset 0 0 var(--s4) color-mix(in srgb, var(--cx) 70%, transparent);
+}
+
+/* Kurze Stationen: Ring mit Namen */
+.emblem {
+  position: relative;
+  width: min(62vmin, 80%);
+  max-height: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.emblem svg {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 var(--s3) color-mix(in srgb, var(--cx) 60%, transparent));
+}
+.emblem-spur,
+.emblem-ring {
+  fill: none;
+  stroke: var(--cx);
+  stroke-linecap: round;
+}
+.emblem-spur {
+  stroke-width: 1.5;
+  stroke-opacity: 0.25;
+  stroke-dasharray: 2 8;
+}
+.emblem-ring {
+  stroke-width: 5;
+  transform: rotate(-90deg);
+  transform-origin: 100px 100px;
+}
+.emblem-name {
+  grid-area: 1 / 1;
+  font-size: clamp(22px, 6vmin, 64px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.emblem-bahn {
+  grid-area: 1 / 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.emblem .orb-hop {
+  left: 50%;
+  top: 6%;
+  margin: calc(-1 * var(--s2)) 0 0 calc(-1 * var(--s2));
+}
+
+/* Fortschritt: verbundene Punkte, der aktuelle leuchtet */
+.progress {
+  isolation: isolate;
+}
+.progress-dot {
+  position: relative;
+}
+.progress-dot + .progress-dot::before {
+  content: '';
+  position: absolute;
+  right: 50%;
+  top: 50%;
+  width: 100%;
+  height: 2px;
+  margin-top: -1px;
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
+  z-index: -1;
+}
+.progress-dot[data-state='done']::before,
+.progress-dot[data-state='now']::before {
+  background: var(--dc);
+}
+.progress-dot .dot {
+  width: calc(2.4 * var(--s1));
+  height: calc(2.4 * var(--s1));
+}
+.progress-dot[data-state='now'] .dot {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--dc),
+    0 0 var(--s4) var(--dc);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app {
+    transition: --cg 150ms ease;
+  }
+  .welt-ringe g {
+    animation: none;
+  }
+  .emblem-ring {
+    transform: none;
+  }
+  .stage .quizkarte:hover:not([aria-disabled='true']) {
+    transform: none;
+  }
+}

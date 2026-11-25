@@ -3,10 +3,11 @@ import type { Player } from '../engine/player'
 import type { Scenario } from '../engine/types'
 import type { Sound } from '../engine/sound'
 import type { Field } from '../fx/field'
-import { isTest, pushEvent, reducedMotion } from '../env'
+import { dur, isTest, pushEvent, reducedMotion } from '../env'
 import { AGENT_EVENT } from '../ui/quiz'
 import { sceneFor } from './registry'
 import type { SceneCtx } from './types'
+import { mountWelt } from './welt'
 
 const MAX_DT = 100 // ms; nach Tab-Wechsel nicht aufholen
 const SAFETY_S = 3 // Notausgang, falls eine Szene den Text nie meldet
@@ -45,11 +46,42 @@ export function runScenes(o: Opts): () => void {
   let calls: gsap.core.Tween[] = []
   let safety: gsap.core.Tween | undefined
   let first = true
+  let einzug: gsap.core.Tween | null = null
+  const welt = mountWelt(slots.buehne, reducedMotion())
+
+  /**
+   * Stationswechsel ohne harten Schnitt: die alte Szene zieht sich zur Mitte zurück und blendet aus,
+   * die Welt dahinter bleibt stehen. Gibt die Dauer des Abgangs zurück.
+   */
+  const abgang = (): number => {
+    const reduced = reducedMotion()
+    const raus = dur(reduced ? 0.1 : 0.32)
+    for (const ch of Array.from(slots.buehne.children) as HTMLElement[]) {
+      if (ch === welt.el || ch.classList.contains('stage-raus')) continue
+      if (!ch.classList.contains('stage') || raus === 0) {
+        ch.remove()
+        continue
+      }
+      ch.classList.replace('stage', 'stage-raus')
+      ch.inert = true
+      ch.setAttribute('aria-hidden', 'true')
+      gsap.killTweensOf(ch)
+      gsap.to(ch, {
+        ...(reduced ? {} : { scale: 0.86, filter: 'blur(6px)' }),
+        opacity: 0,
+        duration: raus,
+        ease: 'power2.in',
+        onComplete: () => ch.remove(),
+      })
+    }
+    return raus
+  }
 
   const enter = () => {
     const my = ++token
     tl?.kill()
-    slots.buehne.replaceChildren()
+    einzug?.kill()
+    const raus = abgang()
     slots.text.querySelectorAll('.erzaehl').forEach((n) => n.remove())
     slots.eingabe.querySelectorAll('.chatblase').forEach((n) => n.remove())
     holding = false
@@ -58,6 +90,7 @@ export function runScenes(o: Opts): () => void {
     const step = player.step
     // Ein Klang je Stationswechsel: der Schleifenstart meldet sich mit „hinweis“, sonst „wisch“; die erste Station nach dem Eintauchen bleibt still.
     if (!first) o.sound.play(step.loopStart ? 'hinweis' : 'wisch')
+    welt.zeige(step, player.index, player.total, first)
     first = false
     app.dataset.station = step.station
     app.style.setProperty('--c', `var(--c-${step.station})`)
@@ -105,6 +138,24 @@ export function runScenes(o: Opts): () => void {
       if (my === token) player.endTransition()
     })
     tl = sceneFor(step.station, o.scenario.art)(ctx)
+    // Einzug: die neue Szene wächst aus der Mitte heraus, sobald die alte weg ist.
+    const neu = slots.buehne.querySelector<HTMLElement>(':scope > .stage')
+    if (neu && raus > 0) {
+      tl.delay(raus)
+      const reduced = ctx.reduced
+      einzug = gsap.fromTo(
+        neu,
+        reduced ? { opacity: 0 } : { opacity: 0, scale: 0.9 },
+        {
+          opacity: 1,
+          ...(reduced ? {} : { scale: 1 }),
+          duration: dur(reduced ? 0.15 : 0.55),
+          delay: raus,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+        },
+      )
+    }
     // Meldet das Ende der Szene (für Tests und das Kontaktblatt): data-szene=fertig, Ereignis szene-fertig.
     app.dataset.szene = 'laeuft'
     const fertig = () => {
@@ -121,7 +172,7 @@ export function runScenes(o: Opts): () => void {
   // Nach 8 s im Auto-Modus meldet der Player den Zeitablauf; die Oberfläche zeigt die Wahl des Agenten.
   const offTimeout = player.on('quizTimeout', () => {
     if (holding) return
-    const quiz = slots.buehne.querySelector('.quiz')
+    const quiz = slots.buehne.querySelector(':scope > .stage .quiz')
     if (quiz) {
       holding = true
       quiz.dispatchEvent(new CustomEvent(AGENT_EVENT))
@@ -143,5 +194,7 @@ export function runScenes(o: Opts): () => void {
     if (auto) gsap.ticker.remove(tick)
     safety?.kill()
     tl?.kill()
+    einzug?.kill()
+    welt.weg()
   }
 }

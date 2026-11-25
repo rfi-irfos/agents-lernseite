@@ -1,6 +1,7 @@
 import type { Art, StationId } from '../engine/types'
 import { orbHop, startScene } from './common'
 import { denken } from './denken'
+import { eingabe } from './eingabe'
 import { api } from './handeln/api'
 import { bild } from './handeln/bild'
 import { code } from './handeln/code'
@@ -20,7 +21,7 @@ const nurText: SceneBuilder = (ctx) => {
   return tl
 }
 
-const SCENES: Partial<Record<StationId, SceneBuilder>> = { wahrnehmung, denken, planung, werkzeug, pruefen, ergebnis }
+const SCENES: Partial<Record<StationId, SceneBuilder>> = { eingabe, wahrnehmung, denken, planung, werkzeug, pruefen, ergebnis }
 const HANDELN: Record<Art, SceneBuilder> = { suche, api, code, bild, planung: planungHandeln }
 
 /** Die Szene einer Station. `art` wählt die Variante von Handeln. */
