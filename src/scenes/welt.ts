@@ -10,6 +10,8 @@ export interface Welt {
   el: HTMLElement
   /** Neue Station: Titel wechselt, die Kugel fliegt in die Mitte, holt die alte Szene ab und bringt die neue. */
   zeige(step: Step, index: number, total: number, erster: boolean): void
+  /** Ablauf zu Ende: der Titel geht, Schein und Ringe bleiben für den Rückblick. */
+  ruhe(): void
   weg(): void
 }
 
@@ -39,7 +41,7 @@ function ringe(): SVGSVGElement {
  * Die Welt hinter den Stationen: Farbschein, kreisende Ringe, Stationstitel und die Daten-Kugel.
  * Sie bleibt über alle Stationen stehen, damit der Ablauf wie eine einzige Fahrt wirkt.
  */
-export function mountWelt(buehne: HTMLElement, reduced: boolean): Welt {
+export function mountWelt(fx: HTMLElement, buehne: HTMLElement, reduced: boolean): Welt {
   const el = document.createElement('div')
   el.className = 'welt'
   el.setAttribute('aria-hidden', 'true')
@@ -64,7 +66,7 @@ export function mountWelt(buehne: HTMLElement, reduced: boolean): Welt {
   titel.append(kugelPlatz, schrift)
 
   el.append(schein, ringe(), titel)
-  buehne.prepend(el)
+  fx.append(el)
 
   let flug: gsap.core.Timeline | null = null
 
@@ -77,6 +79,8 @@ export function mountWelt(buehne: HTMLElement, reduced: boolean): Welt {
     el,
     zeige(step, index, total, erster) {
       flug?.kill()
+      gsap.killTweensOf(titel)
+      gsap.set(titel, { clearProps: 'opacity' })
       gsap.set(kugel, { clearProps: 'all' })
       const kurz = dur(reduced ? 0.15 : 0.3)
       if (erster || kurz === 0) {
@@ -104,6 +108,10 @@ export function mountWelt(buehne: HTMLElement, reduced: boolean): Welt {
       tl.to(kugel, { x: dx, y: dy, scale: 3.2, duration: dur(0.35), ease: 'power2.in' }, 0)
       tl.to(kugel, { scale: 5, opacity: 0.85, duration: dur(0.15), ease: 'power1.out' })
       tl.to(kugel, { x: 0, y: 0, scale: 1, opacity: 1, duration: dur(0.55), ease: 'power2.out', clearProps: 'transform,opacity' })
+    },
+    ruhe() {
+      flug?.kill()
+      gsap.to(titel, { opacity: 0, duration: dur(reduced ? 0.15 : 0.4), ease: EASE })
     },
     weg() {
       flug?.kill()

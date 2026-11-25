@@ -47,80 +47,39 @@ for (const c of cases) {
   })
 }
 
-test('quer: Bühne links, höchstens min(100vw, 2.2 × 100dvh)', async ({ page }) => {
+test('Ablauf: Bühne über die ganze Breite, Untertitel darunter', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/')
-  // Die Anordnung aus Bühne und Text gilt im Ablauf; der Start ist eine eigene Chat-Spalte.
   await page.waitForSelector('#app[data-phase=start]')
   await page.evaluate(() => { document.getElementById('app')!.dataset.phase = 'play' })
   const r = await page.evaluate(() => {
     const b = document.querySelector('[data-slot=buehne]')!.getBoundingClientRect()
     const t = document.querySelector('[data-slot=text]')!.getBoundingClientRect()
-    return { bw: b.width, bl: b.left, tl: t.left, iw: innerWidth, ih: innerHeight }
+    return { bw: b.width, bb: b.bottom, tt: t.top, tm: t.left + t.width / 2, iw: innerWidth }
   })
-  expect(r.bl).toBeLessThan(r.tl)
-  expect(r.bw).toBeLessThanOrEqual(Math.min(r.iw, 2.2 * r.ih) + 0.5)
-  expect(r.bw / r.iw).toBeGreaterThan(0.5)
-  expect(r.bw / r.iw).toBeLessThan(0.7)
+  expect(r.bw / r.iw).toBeGreaterThan(0.9)
+  expect(r.tt).toBeGreaterThanOrEqual(r.bb - 0.5)
+  expect(Math.abs(r.tm - r.iw / 2)).toBeLessThanOrEqual(2)
 })
 
-test('Drehen 360x740 auf 740x360 morpht in höchstens 700 ms, kein Sprung', async ({ page }) => {
+test('Drehen 360x740 auf 740x360: die Bühne folgt dem Fenster, nichts ragt hinaus', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 })
   await page.goto('/')
-  // Die Anordnung aus Bühne und Text gilt im Ablauf; der Start ist eine eigene Chat-Spalte.
   await page.waitForSelector('#app[data-phase=start]')
   await page.evaluate(() => { document.getElementById('app')!.dataset.phase = 'play' })
   await expect(page.locator('#app')).toHaveAttribute('data-format', 'hoch')
-
-  await page.evaluate(() => {
-    const w = window as unknown as { __m: Record<string, unknown> }
-    const rect = (): number[] => {
-      const r = document.querySelector('[data-slot=buehne]')!.getBoundingClientRect()
-      return [r.left, r.top, r.width, r.height]
-    }
-    const app = document.querySelector('#app')!
-    const m: Record<string, unknown> = { start: rect() }
-    w.__m = m
-    new MutationObserver(() => {
-      if (app.getAttribute('data-format') !== 'quer' || m.t0) return
-      const t0 = performance.now()
-      m.t0 = t0
-      m.first = rect()
-      setTimeout(() => (m.s100 = rect()), 100)
-      setTimeout(() => (m.s300 = rect()), 300)
-      setTimeout(() => {
-        m.s700 = rect()
-        m.done = true
-      }, 700)
-    }).observe(app, { attributes: true, attributeFilter: ['data-format'] })
-  })
   await page.setViewportSize({ width: 740, height: 360 })
-  await page.waitForFunction(() => (window as unknown as { __m: { done?: boolean } }).__m.done === true)
-  await page.waitForTimeout(100)
-
+  await expect(page.locator('#app')).toHaveAttribute('data-format', 'quer')
+  await page.waitForTimeout(800)
   const m = await page.evaluate(() => {
-    const w = window as unknown as { __m: Record<string, number[]> }
-    const r = document.querySelector('[data-slot=buehne]')!.getBoundingClientRect()
-    return { ...w.__m, end: [r.left, r.top, r.width, r.height] } as Record<string, number[]>
+    const se = document.scrollingElement!
+    const rects = ['buehne', 'text', 'steuerung'].map((s) => document.querySelector(`[data-slot=${s}]`)!.getBoundingClientRect())
+    return { sw: se.scrollWidth, sh: se.scrollHeight, iw: innerWidth, ih: innerHeight, out: rects.filter((r) => r.left < -0.5 || r.top < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5).length, bw: rects[0].width }
   })
-  // Das Fenster hat schon die neue Größe, der Morph startet in der alten Anordnung (m.first)
-  const start = m.first as number[]
-  const end = m.end as number[]
-  expect(end.some((v, i) => Math.abs(v - (m.start as number[])[i]) > 20)).toBe(true)
-  expect(end.some((v, i) => Math.abs(v - start[i]) > 20)).toBe(true)
-  // nach 700 ms ist die Endlage erreicht
-  for (let i = 0; i < 4; i++) expect(Math.abs((m.s700 as number[])[i] - end[i])).toBeLessThan(2)
-  for (const key of ['s100', 's300'] as const) {
-    const s = m[key] as number[]
-    for (let i = 0; i < 4; i++) {
-      const lo = Math.min(start[i], end[i]) - 2
-      const hi = Math.max(start[i], end[i]) + 2
-      expect(s[i], `${key}[${i}] zwischen Start und Ende`).toBeGreaterThanOrEqual(lo)
-      expect(s[i], `${key}[${i}] zwischen Start und Ende`).toBeLessThanOrEqual(hi)
-    }
-    const strictlyBetween = s.some((v, i) => Math.abs(v - start[i]) > 3 && Math.abs(v - end[i]) > 3)
-    expect(strictlyBetween, `${key} ist ein Zwischenbild`).toBe(true)
-  }
+  expect(m.sw).toBeLessThanOrEqual(m.iw)
+  expect(m.sh).toBeLessThanOrEqual(m.ih)
+  expect(m.out).toBe(0)
+  expect(m.bw / m.iw).toBeGreaterThan(0.9)
 })
 
 test('reduzierte Bewegung: Formatwechsel ohne Flug, Endlage sofort nach 250 ms', async ({ browser }) => {

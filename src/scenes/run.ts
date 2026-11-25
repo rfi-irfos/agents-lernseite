@@ -47,7 +47,7 @@ export function runScenes(o: Opts): () => void {
   let safety: gsap.core.Tween | undefined
   let first = true
   let einzug: gsap.core.Tween | null = null
-  const welt = mountWelt(slots.buehne, reducedMotion())
+  const welt = mountWelt(slot('fx'), slots.buehne, reducedMotion())
 
   /**
    * Stationswechsel ohne harten Schnitt: die alte Szene zieht sich zur Mitte zurück und blendet aus,
@@ -57,7 +57,7 @@ export function runScenes(o: Opts): () => void {
     const reduced = reducedMotion()
     const raus = dur(reduced ? 0.1 : 0.32)
     for (const ch of Array.from(slots.buehne.children) as HTMLElement[]) {
-      if (ch === welt.el || ch.classList.contains('stage-raus')) continue
+      if (ch.classList.contains('stage-raus')) continue
       if (!ch.classList.contains('stage') || raus === 0) {
         ch.remove()
         continue
@@ -168,6 +168,7 @@ export function runScenes(o: Opts): () => void {
   }
 
   const offStep = player.on('step', enter)
+  const offDone = player.on('done', () => welt.ruhe())
 
   // Nach 8 s im Auto-Modus meldet der Player den Zeitablauf; die Oberfläche zeigt die Wahl des Agenten.
   const offTimeout = player.on('quizTimeout', () => {
@@ -189,6 +190,7 @@ export function runScenes(o: Opts): () => void {
   return () => {
     token++ // verspätete Rückrufe (Notausgang, Quiz) verfallen
     offStep()
+    offDone()
     offTimeout()
     calls.forEach((c) => c.kill())
     if (auto) gsap.ticker.remove(tick)

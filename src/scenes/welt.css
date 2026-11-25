@@ -32,7 +32,7 @@
   max-width: none;
   border-color: transparent;
   background: transparent;
-  overflow: visible;
+  overflow: hidden;
 }
 
 #app[data-phase='play'] [data-slot='text'] {
@@ -68,13 +68,14 @@
 .welt {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   display: grid;
   place-items: center;
 }
 .welt-schein {
   position: absolute;
-  inset: -18% -10%;
+  inset: 0;
   background:
     radial-gradient(ellipse 46% 52% at 50% 50%, color-mix(in srgb, var(--cg) 34%, transparent), transparent 72%),
     radial-gradient(ellipse 30% 26% at 18% 82%, color-mix(in srgb, var(--cg) 16%, transparent), transparent 70%),
@@ -82,7 +83,7 @@
 }
 .welt-ringe {
   grid-area: 1 / 1;
-  height: 150%;
+  height: 135%;
   max-width: none;
   aspect-ratio: 1;
   overflow: visible;
@@ -113,8 +114,8 @@
 
 .welt-titel {
   position: absolute;
-  left: var(--s3);
-  top: var(--s2);
+  left: calc(2 * var(--s3));
+  top: calc(var(--s3) + var(--s2));
   display: flex;
   align-items: center;
   gap: var(--s3);
