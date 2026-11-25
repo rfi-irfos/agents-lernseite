@@ -41,8 +41,8 @@ test('Handeln code: Terminal tippt, Testlauf ist im ersten Durchlauf rot, im zwe
   await expect(page.locator('.testlauf')).toContainText('fehlgeschlagen')
   await goTo(page, 10) // handeln, zweiter Durchlauf
   await expect(page.locator('.knoten.aktiv .terminal')).toContainText('sorted(liste)')
-  await expect(page.locator('.testlauf')).toHaveAttribute('data-status', 'gruen')
-  await expect(page.locator('.testlauf')).toContainText('bestanden')
+  await expect(page.locator('.knoten.aktiv .testlauf')).toHaveAttribute('data-status', 'gruen')
+  await expect(page.locator('.knoten.aktiv .testlauf')).toContainText('bestanden')
 })
 
 test('Handeln code: das Terminal tippt zeichenweise', async ({ page }) => {

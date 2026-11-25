@@ -40,7 +40,7 @@ function passeEin(stage: HTMLElement): void {
   if (g < 0.995) stage.style.scale = String(g)
   // Nachmessen: verschachtelter Inhalt kann über die eigenen Kinder hinausragen.
   const b = stage.parentElement
-  for (let i = 0; b && i < 8 && g > 0.5 && (b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1); i++) {
+  for (let i = 0; b && i < 16 && g > 0.4 && (b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1); i++) {
     g *= 0.94
     stage.style.scale = String(g)
   }
