@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 const AUFGABE = 'Brauche ich morgen in Graz einen Schirm?'
 
-test('Start zeigt nur Aufgabe, 4 bis 5 Karten, Feld unten, Knopf und Hinweis', async ({ page }) => {
+test('Start zeigt nur Aufgabe, 4 bis 5 Karten, Feld in der Mitte, Knopf und Hinweis', async ({ page }) => {
   await page.goto('/?test=1')
   await expect(page.getByRole('heading', { name: 'Was soll der Agent für dich tun?' })).toBeVisible()
   const n = await page.locator('[data-card]').count()
@@ -14,7 +14,9 @@ test('Start zeigt nur Aufgabe, 4 bis 5 Karten, Feld unten, Knopf und Hinweis', a
   await expect(page.getByText('Im Hintergrund läuft kein echtes KI-Modell.')).toBeVisible()
   const box = await input.boundingBox()
   const vh = page.viewportSize()!.height
-  expect(box!.y + box!.height).toBeGreaterThan(vh * 0.6)
+  const mitte = box!.y + box!.height / 2
+  expect(mitte).toBeGreaterThan(vh * 0.15)
+  expect(mitte).toBeLessThan(vh * 0.6)
 })
 
 test('leeres Feld ohne Karte: Knopf deaktiviert, Leerzeichen zählen als leer', async ({ page }) => {

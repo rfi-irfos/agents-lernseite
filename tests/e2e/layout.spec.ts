@@ -50,6 +50,9 @@ for (const c of cases) {
 test('quer: Bühne links, höchstens min(100vw, 2.2 × 100dvh)', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/')
+  // Die Anordnung aus Bühne und Text gilt im Ablauf; der Start ist eine eigene Chat-Spalte.
+  await page.waitForSelector('#app[data-phase=start]')
+  await page.evaluate(() => { document.getElementById('app')!.dataset.phase = 'play' })
   const r = await page.evaluate(() => {
     const b = document.querySelector('[data-slot=buehne]')!.getBoundingClientRect()
     const t = document.querySelector('[data-slot=text]')!.getBoundingClientRect()
@@ -64,6 +67,9 @@ test('quer: Bühne links, höchstens min(100vw, 2.2 × 100dvh)', async ({ page }
 test('Drehen 360x740 auf 740x360 morpht in höchstens 700 ms, kein Sprung', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 })
   await page.goto('/')
+  // Die Anordnung aus Bühne und Text gilt im Ablauf; der Start ist eine eigene Chat-Spalte.
+  await page.waitForSelector('#app[data-phase=start]')
+  await page.evaluate(() => { document.getElementById('app')!.dataset.phase = 'play' })
   await expect(page.locator('#app')).toHaveAttribute('data-format', 'hoch')
 
   await page.evaluate(() => {
