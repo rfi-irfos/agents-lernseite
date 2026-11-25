@@ -40,12 +40,13 @@ export function mountStart(
   h1.textContent = de.start.heading
   const list = el('ul', 'start-cards')
   list.setAttribute('aria-label', de.start.cardsLabel)
-  body.append(h1, list)
+  body.append(h1)
   buehne.append(body)
 
+  // Beispiel-Aufgaben stehen wie Vorschläge unter dem Eingabefeld.
   const note = el('p', 'start-note')
   note.textContent = de.start.note
-  text.append(note)
+  text.append(list, note)
 
   const form = el('form', 'start-form')
   form.noValidate = true
@@ -156,6 +157,7 @@ export function mountStart(
   return () => {
     typing?.kill()
     body.remove()
+    list.remove()
     note.remove()
     form.remove()
   }

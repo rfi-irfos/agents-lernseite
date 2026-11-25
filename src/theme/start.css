@@ -5,49 +5,68 @@
   background: transparent;
 }
 
-#app[data-phase='start'][data-format='hoch'],
-#app[data-phase='start'][data-format='quadrat'] {
-  grid-template-rows: minmax(0, 1fr) auto auto auto;
+/* Start wie ein neuer Chat: alles in einer Spalte, in der Bildschirmmitte. */
+#app[data-phase='start'][data-format] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto auto minmax(0, auto) minmax(0, 1.4fr) auto;
+  grid-template-areas:
+    '.'
+    'buehne'
+    'eingabe'
+    'text'
+    '.'
+    'steuerung';
 }
 
-#app[data-phase='start'] [data-slot='buehne'] {
+#app[data-phase='start'] [data-slot='buehne'],
+#app[data-phase='start'] [data-slot='eingabe'],
+#app[data-phase='start'] [data-slot='text'] {
+  justify-self: center;
+  width: min(100%, 46rem);
+  max-width: none;
+  min-height: 0;
+}
+
+#app[data-phase='start'] [data-slot='text'] {
   overflow: hidden;
 }
 
 .start-body {
   box-sizing: border-box;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--s3);
-  padding: var(--s3);
+  padding: 0 var(--s3);
+  text-align: center;
 }
 
 .start-body h1 {
   margin: 0;
-  font-size: clamp(20px, 4.5vmin, 40px);
+  font-size: clamp(22px, 5vmin, 44px);
   line-height: 1.2;
   color: var(--ink);
+  text-wrap: balance;
 }
 
 .start-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14em), 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--s2);
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: var(--s1) var(--s2) 0;
+}
+
+.start-cards li {
+  max-width: 100%;
 }
 
 .start-cards .glass {
-  width: 100%;
   box-sizing: border-box;
+  max-width: 100%;
   text-align: left;
-  font-size: clamp(12px, 1.9vmin, 17px);
+  font-size: clamp(12px, 1.8vmin, 16px);
   line-height: 1.3;
-  overflow-wrap: anywhere;
   padding: var(--s2) var(--s3);
+  border-radius: 999px;
 }
 
 .start-cards .glass[aria-pressed='true'] {
@@ -57,9 +76,10 @@
 .start-note {
   box-sizing: border-box;
   margin: 0;
-  padding: var(--s2) var(--s3);
+  padding: var(--s3) var(--s3) 0;
+  text-align: center;
   color: var(--ink);
-  font-size: clamp(12px, 1.9vmin, 16px);
+  font-size: clamp(12px, 1.7vmin, 15px);
   overflow-wrap: anywhere;
 }
 
@@ -67,10 +87,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s2);
+  align-items: center;
   padding: var(--s2);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) * 1.6);
   background: var(--card);
+  box-shadow: 0 var(--s2) var(--s5) rgb(0 0 0 / 0.18);
+}
+
+.start-form:focus-within {
+  border-color: var(--focus);
 }
 
 .start-form input {
@@ -78,16 +104,15 @@
   min-width: 0;
   box-sizing: border-box;
   font: inherit;
-  font-size: clamp(14px, 2.2vmin, 18px);
+  font-size: clamp(15px, 2.4vmin, 20px);
   color: var(--ink);
   background: transparent;
   border: 0;
-  padding: var(--s2);
+  padding: var(--s3);
 }
 
 .start-form input:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .start-form .glass:disabled {

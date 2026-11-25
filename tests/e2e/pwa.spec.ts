@@ -47,7 +47,7 @@ test('offline: Service Worker aktiv, App startet, fünf Abläufe wählbar, wette
   await page.waitForTimeout(1500)
   await context.setOffline(true)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Deine Aufgabe' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Was soll der Agent für dich tun?' })).toBeVisible()
   const n = await page.locator('[data-card]').count()
   expect(n).toBe(5)
   for (let i = 0; i < n; i++) {

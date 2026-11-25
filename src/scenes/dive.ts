@@ -17,6 +17,7 @@ export const dive: SceneBuilder = (ctx) => {
   const tl = gsap.timeline({ defaults: { ease: EASE } })
   const startParts = [
     buehne.querySelector('.start-body'),
+    text.querySelector('.start-cards'),
     text.querySelector('.start-note'),
   ].filter((x): x is Element => !!x)
   const gate = eingabe.querySelector<HTMLElement>('.start-form')
@@ -49,7 +50,10 @@ export const dive: SceneBuilder = (ctx) => {
   if (gate) {
     const from = gate.getBoundingClientRect()
     const slotH = eingabe.getBoundingClientRect().height
+    // Ziel ist die Bühne im Spiel-Layout: kurz umschalten, messen, zurück (ohne Zeichnen dazwischen).
+    app.dataset.phase = 'play'
     const to = buehne.getBoundingClientRect()
+    app.dataset.phase = 'start'
     const kids = Array.from(gate.children)
     tl.set(eingabe, { height: slotH }, 0)
     tl.set(

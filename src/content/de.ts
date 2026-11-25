@@ -34,7 +34,7 @@ export const de = {
     ergebnis: 'Ergebnis',
   },
   start: {
-    heading: 'Deine Aufgabe',
+    heading: 'Was soll der Agent für dich tun?',
     inputLabel: 'Deine Aufgabe',
     placeholder: 'Schreib deine eigene Aufgabe …',
     cardsLabel: 'Beispiel-Aufgaben',

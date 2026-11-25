@@ -288,7 +288,7 @@ test('Nächster Ablauf führt zurück zum Startbildschirm, ein neuer Ablauf star
   await page.evaluate(() => (window as unknown as TW).__player!.next())
   await expect.poll(() => state(page)).toBe('done')
   await page.locator('[data-action=weiter-ablauf]').click()
-  await expect(page.getByRole('heading', { name: 'Deine Aufgabe' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Was soll der Agent für dich tun?' })).toBeVisible()
   await expect(page.locator('.controls')).toHaveCount(0)
   await expect(page.locator('[data-action=theme]')).toHaveCount(1)
   await expect(page.locator('.chatblase')).toHaveCount(0)

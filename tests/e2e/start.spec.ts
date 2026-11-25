@@ -4,7 +4,7 @@ const AUFGABE = 'Brauche ich morgen in Graz einen Schirm?'
 
 test('Start zeigt nur Aufgabe, 4 bis 5 Karten, Feld unten, Knopf und Hinweis', async ({ page }) => {
   await page.goto('/?test=1')
-  await expect(page.getByRole('heading', { name: 'Deine Aufgabe' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Was soll der Agent für dich tun?' })).toBeVisible()
   const n = await page.locator('[data-card]').count()
   expect(n).toBeGreaterThanOrEqual(4)
   expect(n).toBeLessThanOrEqual(5)
@@ -136,3 +136,45 @@ test('freie Eingabe ohne Treffer zeigt den Beispiel-Hinweis, Karte nicht', async
   await expect(page.getByText('Das ist ein Beispiel.')).toHaveCount(0)
   expect(await page.evaluate(() => window.__events!.filter((e) => e.type === 'beispiel').length)).toBe(0)
 })
+
+const START_VIEWS = [
+  { w: 320, h: 568 },
+  { w: 360, h: 740 },
+  { w: 820, h: 1000 },
+  { w: 1024, h: 768 },
+  { w: 1920, h: 925 },
+  { w: 800, h: 360 },
+]
+for (const v of START_VIEWS) {
+  test(`Start wie ein Chat: Eingabefeld mittig, Vorschläge darunter (${v.w}×${v.h})`, async ({ page }) => {
+    await page.setViewportSize({ width: v.w, height: v.h })
+    await page.goto('/')
+    await expect(page.locator('.start-form')).toBeVisible()
+    const m = await page.evaluate(() => {
+      const r = (s: string) => document.querySelector(s)!.getBoundingClientRect()
+      const cards = Array.from(document.querySelectorAll('[data-card]')).map((c) => c.getBoundingClientRect())
+      const slot = r('[data-slot=text]')
+      return {
+        form: r('.start-form'),
+        h1: r('.start-body h1'),
+        note: r('.start-note'),
+        cards: cards.map((c) => ({ top: c.top, bottom: c.bottom, left: c.left, right: c.right })),
+        slotBottom: slot.bottom,
+        steuerungTop: r('[data-slot=steuerung]').top,
+      }
+    })
+    const mid = m.form.left + m.form.width / 2
+    expect(Math.abs(mid - v.w / 2)).toBeLessThanOrEqual(2)
+    expect(m.h1.bottom).toBeLessThanOrEqual(m.form.top)
+    expect(m.h1.top).toBeGreaterThanOrEqual(0)
+    for (const c of m.cards) {
+      expect(c.top).toBeGreaterThanOrEqual(m.form.bottom)
+      expect(c.bottom).toBeLessThanOrEqual(m.slotBottom + 0.5)
+      expect(c.left).toBeGreaterThanOrEqual(0)
+      expect(c.right).toBeLessThanOrEqual(v.w)
+    }
+    expect(m.note.bottom).toBeLessThanOrEqual(Math.min(m.slotBottom, m.steuerungTop) + 0.5)
+    await page.screenshot({ path: `test-out/start/${v.w}x${v.h}.png` })
+    await page.emulateMedia({ colorScheme: 'light' })
+  })
+}
