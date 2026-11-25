@@ -100,15 +100,11 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
     const flaeche = document.createElement('div')
     flaeche.className = 'knoten-buehne'
     flaeche.inert = true
-    const ruhe = document.createElement('div')
-    ruhe.className = 'knoten-ruhe'
-    ruhe.setAttribute('aria-hidden', 'true')
-    ruhe.textContent = de.stationNamen[step.station]
     const satz = document.createElement('p')
     satz.className = 'knoten-satz'
     satz.setAttribute('aria-hidden', 'true')
     satz.textContent = step.script.text
-    k.append(ruhe, flaeche, kopf, satz)
+    k.append(flaeche, kopf, satz)
     welt.append(k)
     knoten.push(k)
     flaechen.push(flaeche)
@@ -145,6 +141,7 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
   let kw = 1
   let kh = 1
   let spalten = 4
+  let reiheY = 1.46 // Abstand der Reihen in Knotenhöhen
   const cam = { x: 0, y: 0, z: 1 }
   let aktiv = 0
   let weit = -1 // höchster schon besuchter Knoten
@@ -155,7 +152,7 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
     const reihe = Math.floor(i / spalten)
     const c = i % spalten
     const spalte = reihe % 2 ? spalten - 1 - c : c
-    return { x: (spalte * 1.2 + versatz[i].x) * kw, y: (reihe * 1.46 + versatz[i].y) * kh }
+    return { x: (spalte * 1.2 + versatz[i].x) * kw, y: (reihe * reiheY + versatz[i].y) * kh }
   }
 
   const pfad = (a: P, b: P): string => {
@@ -187,6 +184,10 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
     welt.style.transform = `translate(${W / 2 - cam.x * cam.z}px, ${H / 2 - cam.y * cam.z}px) scale(${cam.z})`
     prozent.textContent = `${Math.round(cam.z * 100)} %`
     el.dataset.sicht = cam.z < 0.72 ? 'weit' : 'nah'
+    // Herausgezoomt wachsen Kopf und Satz mit, damit sie lesbar bleiben.
+    const k = Math.min(3.2, Math.max(1, 0.5 / cam.z))
+    welt.style.setProperty('--kopf', k.toFixed(3))
+    welt.style.setProperty('--satz', Math.min(1.7, k).toFixed(3))
   }
 
   const messe = () => {
@@ -195,6 +196,8 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
     kw = Math.max(120, W - 2 * RAND)
     kh = Math.max(120, H - 2 * RAND)
     spalten = W / H > 1.25 ? 4 : W / H > 0.8 ? 3 : 2
+    // Die nächste Reihe beginnt erst unter dem Bildrand, damit bei Zoom 1 nur ein Knoten im Bild steht.
+    reiheY = 1 + Math.max(0.34 * kh, window.innerHeight - H + 48) / kh
     welt.style.setProperty('--kw', `${kw}px`)
     welt.style.setProperty('--kh', `${kh}px`)
     lege()
@@ -253,7 +256,7 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
       l = Math.min(l, p.x - kw / 2)
       r = Math.max(r, p.x + kw / 2)
       t = Math.min(t, p.y - kh / 2)
-      b = Math.max(b, p.y + kh * 0.86)
+      b = Math.max(b, p.y + kh * 0.8)
     }
     const z = Math.min(1, Math.max(ZMIN, Math.min(W / (r - l), H / (b - t)) * 0.9))
     frei = true
@@ -443,9 +446,9 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
         flug = tl
         return
       }
-      const tl = gsap.timeline({ onComplete: da })
+      const tl = gsap.timeline({ onComplete: da, onUpdate: male })
       const tief = Math.min(cam.z, 0.66)
-      tl.to(cam, { x: ziel.x, y: ziel.y, duration: t, ease: 'power3.inOut', onUpdate: male }, 0)
+      tl.to(cam, { x: ziel.x, y: ziel.y, duration: t, ease: 'power3.inOut' }, 0)
       tl.to(cam, { z: tief, duration: t * 0.42, ease: 'power2.out' }, 0)
       tl.to(cam, { z: 1, duration: t * 0.58, ease: 'power2.inOut' }, t * 0.42)
       // Die Kugel trägt die Daten über die Leitung zum nächsten Knoten.

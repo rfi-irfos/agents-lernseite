@@ -32,8 +32,8 @@
 }
 .kante {
   fill: none;
-  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
-  stroke-width: 3;
+  stroke: color-mix(in srgb, var(--ink) 22%, transparent);
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-dasharray: 2 12;
   vector-effect: non-scaling-stroke;
@@ -84,7 +84,11 @@
   --cx: color-mix(in srgb, var(--c) 58%, white);
 }
 .knoten:not(.besucht) {
-  opacity: 0.6;
+  opacity: 0.5;
+}
+.knoten:not(.besucht) .knoten-buehne {
+  background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--c) 22%, transparent), transparent 60%);
+  border-radius: inherit;
 }
 .knoten.aktiv {
   cursor: inherit;
@@ -113,7 +117,7 @@
   gap: var(--s2);
   cursor: grab;
   transform-origin: 0 0;
-  transition: transform 500ms ease;
+  transform: scale(var(--kopf, 1));
 }
 .knoten-nr {
   flex: none;
@@ -147,23 +151,6 @@
   color: var(--ink);
 }
 
-/* Noch nicht besucht: nur der Name, groß in der Mitte */
-.knoten-ruhe {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: calc(var(--kh) * 0.14);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: color-mix(in srgb, var(--cx) 70%, var(--ink));
-  opacity: 0.55;
-  transition: opacity 500ms ease;
-}
-.knoten.besucht .knoten-ruhe {
-  opacity: 0;
-}
-
 /* Der Satz der Station steht unter ihrem Knoten, sobald man herauszoomt */
 .knoten-satz {
   position: absolute;
@@ -173,7 +160,7 @@
   margin: var(--s4) 0 0;
   text-align: center;
   text-wrap: balance;
-  font-size: calc(var(--kh) * 0.062);
+  font-size: calc(var(--kh) * 0.05 * var(--satz, 1));
   font-weight: 600;
   line-height: 1.3;
   color: var(--ink);
@@ -183,9 +170,6 @@
 }
 .karte[data-sicht='weit'] .knoten.besucht .knoten-satz {
   opacity: 1;
-}
-.karte[data-sicht='weit'] .knoten-kopf {
-  transform: scale(2.1);
 }
 /* Herausgezoomt übernimmt die Karte das Erzählen; der Untertitel tritt zurück */
 .erzaehl {
@@ -267,14 +251,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .knoten,
-  .knoten-kopf,
-  .knoten-ruhe,
   .knoten-satz,
   .kante,
   .erzaehl {
     transition-duration: 150ms;
-  }
-  .karte[data-sicht='weit'] .knoten-kopf {
-    transform: none;
   }
 }
