@@ -4,7 +4,7 @@ import { dur } from '../env'
 import type { Step } from '../engine/steps'
 
 const NS = 'http://www.w3.org/2000/svg'
-const ZMIN = 0.12
+const ZMIN = 0.05
 const ZMAX = 1.6
 /** Rand zwischen Knoten und Bildkante, wenn die Kamera auf einem Knoten steht. */
 const RAND = 10
@@ -142,6 +142,7 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
   let kh = 1
   let spalten = 4
   let reiheY = 1.46 // Abstand der Reihen in Knotenhöhen
+  let kopfBreit = 200
   const cam = { x: 0, y: 0, z: 1 }
   let aktiv = 0
   let weit = -1 // höchster schon besuchter Knoten
@@ -185,9 +186,11 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
     prozent.textContent = `${Math.round(cam.z * 100)} %`
     el.dataset.sicht = cam.z < 0.72 ? 'weit' : 'nah'
     // Herausgezoomt wachsen Kopf und Satz mit, damit sie lesbar bleiben.
-    const k = Math.min(3.2, Math.max(1, 0.5 / cam.z))
+    const k = Math.max(1, Math.min(2.6, 0.5 / cam.z, (kw * 0.92) / kopfBreit))
     welt.style.setProperty('--kopf', k.toFixed(3))
-    welt.style.setProperty('--satz', Math.min(1.7, k).toFixed(3))
+    // Der Satz darf höchstens den Platz bis zur nächsten Reihe füllen.
+    const platz = Math.sqrt(((reiheY - 1) * kh * kw) / 70)
+    welt.style.setProperty('--satz', `${Math.min(kh * 0.05 * k, platz).toFixed(1)}px`)
   }
 
   const messe = () => {
@@ -195,11 +198,12 @@ export function mountKarte(sicht: HTMLElement, o: Opts): Karte {
     H = Math.max(1, sicht.clientHeight)
     kw = Math.max(120, W - 2 * RAND)
     kh = Math.max(120, H - 2 * RAND)
-    spalten = W / H > 1.25 ? 4 : W / H > 0.8 ? 3 : 2
+    spalten = W / H > 1.25 ? 4 : 3
     // Die nächste Reihe beginnt erst unter dem Bildrand, damit bei Zoom 1 nur ein Knoten im Bild steht.
     reiheY = 1 + Math.max(0.34 * kh, window.innerHeight - H + 48) / kh
     welt.style.setProperty('--kw', `${kw}px`)
     welt.style.setProperty('--kh', `${kh}px`)
+    kopfBreit = Math.max(120, ...knoten.map((k) => (k.querySelector<HTMLElement>('.knoten-kopf')?.offsetWidth ?? 0)))
     lege()
   }
 

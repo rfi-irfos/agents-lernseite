@@ -160,7 +160,7 @@
   margin: var(--s4) 0 0;
   text-align: center;
   text-wrap: balance;
-  font-size: calc(var(--kh) * 0.05 * var(--satz, 1));
+  font-size: var(--satz, 24px);
   font-weight: 600;
   line-height: 1.3;
   color: var(--ink);
@@ -176,7 +176,7 @@
   transition: opacity 400ms ease;
 }
 #app:has(.karte[data-sicht='weit']) .erzaehl {
-  opacity: 0;
+  opacity: 0 !important;
 }
 
 /* Zoom-Leiste oben rechts, daneben Ton und Hell/Dunkel */
