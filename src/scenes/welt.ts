@@ -20,9 +20,10 @@ function ringe(): SVGSVGElement {
   svg.setAttribute('viewBox', '0 0 200 200')
   svg.setAttribute('class', 'welt-ringe')
   for (const [r, dash, cls] of [
-    [52, '2 9', 'ring-a'],
-    [74, '14 10', 'ring-b'],
-    [96, '1 6', 'ring-c'],
+    [46, '0.4 3', 'ring-a'],
+    [64, '60 8 4 8', 'ring-b'],
+    [82, '0.4 5', 'ring-c'],
+    [98, '90 14', 'ring-b'],
   ] as const) {
     const g = document.createElementNS(NS, 'g')
     g.setAttribute('class', cls)
