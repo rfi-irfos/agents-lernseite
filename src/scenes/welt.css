@@ -318,7 +318,7 @@
 }
 .stage .quizkarte {
   box-sizing: border-box;
-  flex: 1 1 28%;
+  flex: 0 1 max(28%, 9em);
   max-width: 16em;
   padding: var(--s4) var(--s2);
   font-size: clamp(12px, 2.6vmin, 28px);

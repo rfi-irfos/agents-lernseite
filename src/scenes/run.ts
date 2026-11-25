@@ -17,6 +17,7 @@ const SAFETY_S = 3 // Notausgang, falls eine Szene den Text nie meldet
  * verkleinert. Die CSS-Eigenschaft scale bleibt neben den transform-Animationen von GSAP bestehen.
  */
 function passeEin(stage: HTMLElement): void {
+  if (!stage.classList.contains('stage')) return
   stage.style.scale = ''
   const cs = getComputedStyle(stage)
   const platzH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
@@ -32,7 +33,14 @@ function passeEin(stage: HTMLElement): void {
   }
   if (unten <= oben || platzH <= 0 || platzB <= 0) return
   const f = Math.min(1, platzH / (unten - oben), platzB / breit)
-  if (f < 0.995) stage.style.scale = String(Math.max(0.5, f))
+  let g = f
+  if (g < 0.995) stage.style.scale = String(g)
+  // Nachmessen: verschachtelter Inhalt kann über die eigenen Kinder hinausragen.
+  const b = stage.parentElement
+  for (let i = 0; b && i < 8 && g > 0.5 && (b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1); i++) {
+    g *= 0.94
+    stage.style.scale = String(g)
+  }
 }
 
 interface Opts {
